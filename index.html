@@ -1,0 +1,551 @@
+<!DOCTYPE html>
+<!--
+  患者及家属科普手册（肝胆胰·十二指肠·甲状腺·胆石症版）
+  - 单文件、离线可用、免费部署（GitHub Pages / Gitee Pages / Netlify 等静态托管均可）
+  - 内容核对至 2026 年 9 月；仅供患者教育，不构成诊疗建议
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>患者及家属科普手册 · 肝胆胰·十二指肠·甲状腺版</title>
+<style>
+:root{
+  --teal:#0f766e; --teal-d:#0b4f4a; --teal-l:#e6f4f2;
+  --bg:#f5faf9; --card:#ffffff; --line:#e3edeb;
+  --ink:#1b2b29; --ink-2:#4d605d; --ink-3:#7a8b88;
+  --amber:#b26a00; --amber-l:#fdf3e0;
+  --blue:#1d5fa8; --blue-l:#e8f1fb;
+  --green:#0a7a4e; --green-l:#e6f7ef;
+  --purple:#7c3aed; --purple-l:#f4ecfb;
+  --red:#b3261e; --red-l:#fdecea;
+  --radius:14px;
+  --shadow:0 1px 3px rgba(11,79,74,.06), 0 6px 20px rgba(11,79,74,.06);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+  background:var(--bg); color:var(--ink); font-size:16px; line-height:1.78;
+}
+.wrap{max-width:820px; margin:0 auto; padding:0 16px 60px;}
+a{color:var(--teal);}
+
+header.top{background:linear-gradient(135deg,var(--teal-d) 0%,var(--teal) 60%,#12a394 100%); color:#fff; padding:34px 16px 26px;}
+header.top .wrap{max-width:820px;}
+header.top h1{font-size:24px; letter-spacing:.5px;}
+header.top .sub{margin-top:6px; font-size:14.5px; opacity:.92;}
+.pill{display:inline-block; padding:3px 11px; border-radius:999px; font-size:12.5px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28); margin:12px 6px 0 0;}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px 20px; margin-top:16px;}
+h2.sec{
+  font-size:21px; margin:34px 0 4px; display:flex; align-items:center; gap:10px; color:var(--teal-d);
+  scroll-margin-top:14px;
+}
+h2.sec .n{background:var(--teal); color:#fff; width:30px; height:30px; border-radius:9px; display:flex; align-items:center; justify-content:center; font-size:15px; flex:none;}
+.sec-desc{color:var(--ink-3); font-size:14px; margin:2px 0 6px;}
+
+details.topic{margin-top:12px; border:1px solid var(--line); border-radius:12px; background:#fff; overflow:hidden;}
+details.topic summary{
+  cursor:pointer; font-weight:600; color:var(--ink); font-size:16px; padding:13px 16px;
+  list-style:none; position:relative; padding-right:34px;
+}
+details.topic summary::-webkit-details-marker{display:none;}
+details.topic summary::after{content:"＋"; position:absolute; right:15px; top:11px; color:var(--teal); font-size:18px; font-weight:400;}
+details.topic[open] summary::after{content:"－";}
+details.topic[open] summary{background:var(--teal-l); color:var(--teal-d);}
+details.topic .body{padding:12px 18px 16px; border-top:1px solid var(--line); font-size:15px;}
+details.topic .body h4{font-size:14.5px; color:var(--teal-d); margin:12px 0 4px;}
+details.topic .body p{margin:6px 0;}
+details.topic .body ul, details.topic .body ol{margin:6px 0 6px 20px;}
+details.topic .body li{margin:4px 0;}
+.note{background:var(--amber-l); border:1px solid #f0dcb5; border-radius:10px; padding:9px 13px; font-size:14px; margin:10px 0; color:#5c4400;}
+.warn{background:var(--red-l); border:1px solid #f3ccc8; border-radius:10px; padding:9px 13px; font-size:14px; margin:10px 0; color:#7a1d17;}
+.alert-li{display:flex; gap:10px; align-items:flex-start; margin:8px 0;}
+.alert-li .mark{flex:none; background:var(--red); color:#fff; border-radius:6px; font-size:12px; font-weight:700; padding:2px 8px; margin-top:4px;}
+.alert-li p{font-size:14.5px;}
+
+.toc{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-top:16px;}
+.toc a{
+  display:block; background:#fff; border:1.5px solid var(--line); border-radius:12px; padding:13px 10px;
+  text-align:center; font-size:14.5px; font-weight:600; color:var(--ink); text-decoration:none;
+}
+.toc a:hover{border-color:var(--teal); color:var(--teal-d);}
+
+.btn{display:inline-flex; align-items:center; justify-content:center; padding:11px 20px; border:none; border-radius:11px; font-size:15px; font-weight:600; cursor:pointer; font-family:inherit;}
+.btn-pri{background:var(--teal); color:#fff;}
+.btn-sec{background:#fff; border:1.5px solid var(--line); color:var(--ink-2);}
+.top-bar{display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;}
+
+footer{margin-top:40px; border-top:1px solid var(--line); padding-top:16px; font-size:13px; color:var(--ink-3);}
+footer p{margin:4px 0;}
+
+@media print{
+  body{background:#fff; font-size:12px;}
+  .no-print{display:none !important;}
+  .wrap{max-width:100%; padding:0;}
+  .card{box-shadow:none; border:1px solid #ccc; break-inside:avoid;}
+  details.topic{border:1px solid #ccc; break-inside:avoid;}
+  details.topic summary::after{content:"";}
+  header.top{background:#fff !important; color:#000; border-bottom:2px solid #333; padding:10px 0;}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <h1>患者及家属科普手册</h1>
+    <div class="sub">写给家属看的「从报告到护理」实用手册 · 覆盖肝癌 / 胰腺癌 / 胆管癌 / 胆囊癌 / 十二指肠癌 / 甲状腺结节与甲状腺癌 / 胆囊结石 / 胆总管结石</div>
+    <div class="pill">免费 · 离线可用</div>
+    <div class="pill">内容核对至 2026 年 9 月</div>
+    <div class="pill">仅供患者教育，不替代医生</div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="top-bar no-print">
+    <button class="btn btn-sec" onclick="window.print()">打印 / 存为 PDF</button>
+    <a class="btn btn-sec" style="text-decoration:none;" href="#toc">看目录</a>
+  </div>
+
+  <!-- 目录 -->
+  <nav class="toc no-print" id="toc">
+    <a href="#s1">1 看懂报告</a>
+    <a href="#s2">2 治疗怎么选</a>
+    <a href="#s3">3 居家护理与营养</a>
+    <a href="#s4">4 钱与资源</a>
+    <a href="#s5" style="border-color:#f3ccc8; color:var(--red);">5 急诊警示</a>
+    <a href="#s6">6 就医实用贴士</a>
+  </nav>
+
+  <!-- 重要声明 -->
+  <div class="card" style="border-color:#f0dcb5; background:#fffdf7; margin-top:16px;">
+    <h4 style="color:var(--amber); font-size:15px; margin-bottom:6px;">先读这一段</h4>
+    <p style="font-size:13.5px; color:var(--ink-2);">
+      本手册由医学研究者编写，用于<strong>家属教育和初步理解</strong>，不构成诊断、处方或治疗建议。
+      每位患者的分期、病理、身体情况都不同，<strong>所有决定以主管医生和医院为准</strong>。
+      手册中的检查、用药、随访安排为一般性知识，可能与您所在医院或最新指南有差异。
+      出现任何紧急情况，请直接联系医生或去急诊，不要在手机里查答案耽误时间。
+    </p>
+  </div>
+
+  <!-- ============ 1 看懂报告 ============ -->
+  <h2 class="sec" id="s1"><span class="n">1</span>看懂报告</h2>
+  <p class="sec-desc">拿到病理、影像、化验报告先别慌，按下面顺序看：是什么病、到哪一期、指标代表什么。</p>
+
+  <details class="topic" open>
+    <summary>病理报告怎么看（最重要的一张纸）</summary>
+    <div class="body">
+      <p>病理报告是诊断的「金标准」，也是决定治疗方案的核心依据。重点看这几项：</p>
+      <ul>
+        <li><b>组织学类型</b>：是哪一种癌（如胰腺导管腺癌、胆管腺癌、甲状腺乳头状癌等）。不同类型的治疗和预后差别很大。</li>
+        <li><b>分化程度</b>：高/中/低分化。分化越低通常恶性度越高，但要结合其他指标一起看。</li>
+        <li><b>切缘</b>：报告写「切缘阴性 / R0」表示手术切干净了；写「阳性 / R1」说明可能没切净，医生会考虑补充治疗。</li>
+        <li><b>淋巴结</b>：清扫了多少个、几个有转移。淋巴结转移情况直接影响分期和后续治疗。</li>
+        <li><b>脉管癌栓 / 神经侵犯</b>：出现提示复发风险略高，医生会据此加强随访。</li>
+        <li><b>免疫组化（IHC）</b>：一堆字母（如 CK7、CK19、Ki-67、降钙素…），用于确认来源和分型，家属不用逐项深究。</li>
+      </ul>
+      <div class="note"><b>两个实用动作：</b>① 看不懂的地方列成问题清单，问医生时逐条问；② 如果对诊断有疑问或想确认，可以申请<strong>病理会诊</strong>（带上蜡块/切片到上级医院复核），很多大医院有会诊流程。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>各癌种病理类型速览（胰腺 / 胆道 / 十二指肠 / 甲状腺）</summary>
+    <div class="body">
+      <h4>胰腺</h4>
+      <ul>
+        <li><b>胰腺导管腺癌（PDAC）</b>：最常见、恶性度高，多数确诊偏晚。治疗以化疗为主，基因检测（BRCA、KRAS G12C、MSI 等）可帮找机会。</li>
+        <li><b>胰腺神经内分泌肿瘤（NET）</b>：占少数，比导管腺癌「温和」很多，生长慢，治疗和随访策略完全不同。</li>
+        <li><b>囊性肿瘤（如 IPMN）</b>：部分有癌变风险，需要按医生要求定期随访。</li>
+      </ul>
+      <h4>胆管 / 胆囊</h4>
+      <ul>
+        <li>绝大多数是<b>腺癌</b>。胆囊癌常与长期胆囊结石、慢性胆囊炎有关（但绝大多数结石患者不会得胆囊癌，不用过度恐慌）。</li>
+        <li>胆管癌分肝内、肝外，两者治疗策略有差异；肝内胆管癌建议做基因检测（FGFR2、IDH1 等有对应药物）。</li>
+      </ul>
+      <h4>十二指肠</h4>
+      <ul>
+        <li>多为<b>腺癌</b>，治疗思路接近小肠/结直肠癌；MSI-H 比例相对高，免疫治疗机会大。</li>
+      </ul>
+      <h4>甲状腺</h4>
+      <ul>
+        <li><b>乳头状癌</b>：最常见（约占 85-90%），生长慢、预后最好，很多「带瘤生存」很多年。</li>
+        <li><b>滤泡状癌</b>：次常见，总体预后也好。</li>
+        <li><b>髓样癌</b>：少见，与 RET 基因相关，需要查降钙素，治疗思路不同。</li>
+        <li><b>未分化癌</b>：极罕见但恶性度极高，需多学科团队处理。</li>
+      </ul>
+      <div class="note">甲状腺癌里约 95% 是预后良好的分化型（乳头状+滤泡状），「一得甲状腺癌就完了」是最大的误解。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>TNM 分期是什么、决定什么</summary>
+    <div class="body">
+      <ul>
+        <li><b>T</b>＝原发肿瘤：大小、侵犯深度（如胰腺癌是否侵犯血管，甲状腺癌是否突破包膜）。</li>
+        <li><b>N</b>＝淋巴结：有没有转移、转移区域。</li>
+        <li><b>M</b>＝远处转移：有没有转移到肝、肺、骨等。</li>
+        <li>组合成 <b>Ⅰ-Ⅳ 期</b>，决定治疗路线：早期以手术为主，晚期以全身治疗为主。</li>
+      </ul>
+      <div class="note"><b>提醒：</b>① 「临床分期」和「术后病理分期」可能不同，最终以病理分期为准；② 不同癌种的分期标准不一样，不要拿别人的报告套自己的；③ 分期不等于判死刑——同一分期里个体差异很大，治疗手段也在不断进步。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>肿瘤标志物怎么看（AFP / CA19-9 / CEA / 甲功）</summary>
+    <div class="body">
+      <ul>
+        <li><b>AFP</b>：肝癌常用；部分肝病患者也会偏高，需结合影像。</li>
+        <li><b>CA19-9</b>：胰腺癌、胆管癌、胆囊癌最常用，但<b>胆管炎、黄疸、胰腺炎都会让它升高</b>——单独一次升高不等于复发，要看连续趋势。</li>
+        <li><b>CEA</b>：消化道肿瘤通用参考。</li>
+        <li><b>甲状腺</b>：TSH/T3/T4 看甲状腺功能；分化型甲状腺癌术后随访看 <b>Tg（甲状腺球蛋白）</b>（注意：抗体阳性时 Tg 会受影响）；髓样癌看 <b>降钙素</b>。</li>
+      </ul>
+      <div class="warn"><b>三个原则：</b>① 标志物「升高 ≠ 复发」，必须结合影像和医生判断；② 「正常 ≠ 无复发」，约 20-30% 的患者不分泌标志物；③ 只用「同一家医院的同一项指标」纵向比较才可靠。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>影像报告高频词（CT / MRI / PET-CT / 超声）</summary>
+    <div class="body">
+      <ul>
+        <li><b>增强 CT/MRI</b>：看「动脉期、门脉期、延迟期」的强化方式，判断病灶血供与性质；「边界清晰/模糊、有无坏死、有无血管侵犯」是关键。</li>
+        <li><b>PET-CT</b>：看代谢活性（SUVmax）。炎症也会「假阳性」，不是 SUV 高就一定是癌。</li>
+        <li><b>MRCP</b>：无创看胆道全程，是胆管结石、胆管梗阻的重要检查。</li>
+        <li><b>超声</b>：肝胆胰和甲状腺的一线检查；甲状腺报告重点看分级（下一节专讲）。</li>
+      </ul>
+      <div class="note"><b>实用建议：</b>随访时尽量带<strong>原片（光盘或二维码）</strong>而不是只带报告单，不同医院医生可以自己阅片对比。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>甲状腺结节报告专讲（TI-RADS / C-TIRADS / 穿刺报告）</summary>
+    <div class="body">
+      <p><b>先说结论：</b>甲状腺结节非常常见（成人超声检出率可达 20-70%），其中 <b>90% 以上是良性</b>；即便恶性，绝大多数也是预后很好的甲状腺癌。</p>
+      <h4>超声分级怎么读</h4>
+      <ul>
+        <li>国内报告常见 <b>TI-RADS（1-5 类）</b>或 <b>C-TIRADS（1-6 类）</b>，数字越高，恶性风险越高。</li>
+        <li>一般：<b>3 类及以下</b>恶性风险很低，定期复查即可；<b>4 类及以上</b>需要专科评估，医生可能建议穿刺（FNA）或手术；<b>5/6 类</b>高度怀疑或已确诊恶性。</li>
+        <li>报告里「低回声、边界不清、纵横比＞1、微钙化、淋巴结异常」等描述会增加风险评分——但由医生综合判读，家属不要自己逐条对照吓自己。</li>
+      </ul>
+      <h4>穿刺（FNA）报告 Bethesda 分级怎么读</h4>
+      <ul>
+        <li><b>Ⅰ 类</b>：取材不满意，可能要重穿。</li>
+        <li><b>Ⅱ 类</b>：良性，随访即可。</li>
+        <li><b>Ⅲ / Ⅳ 类</b>：意义不明确/滤泡性病变——不能确定，医生会根据结节大小和超声特征决定：再穿、观察或手术。</li>
+        <li><b>Ⅴ 类</b>：可疑恶性；<b>Ⅵ 类</b>：恶性——通常建议手术。</li>
+      </ul>
+      <div class="note">分级是「风险评估」不是「确诊」，最终诊断以手术后的完整病理为准。良性结节一般 6-12 个月复查一次超声，连续稳定可延长间隔。</div>
+    </div>
+  </details>
+
+  <!-- ============ 2 治疗怎么选 ============ -->
+  <h2 class="sec" id="s2"><span class="n">2</span>治疗怎么选</h2>
+  <p class="sec-desc">先看「能不能手术」，再看「要不要化疗/靶向/免疫」，最后看「局部治疗有没有机会」。</p>
+
+  <details class="topic" open>
+    <summary>各癌种治疗路径一图速览</summary>
+    <div class="body">
+      <h4>肝癌</h4>
+      <ul>
+        <li>早期：手术切除 / 消融 / 肝移植，<b>肝功能是核心决定因素</b>。</li>
+        <li>中期：介入治疗（TACE / HAIC）。</li>
+        <li>晚期：系统治疗为主——靶向（索拉非尼、仑伐替尼等）+ 免疫（阿替利珠单抗+贝伐珠单抗、信迪利单抗+贝伐珠单抗等）。</li>
+      </ul>
+      <h4>胰腺癌</h4>
+      <ul>
+        <li>可切除：先手术，术后辅助化疗。</li>
+        <li>交界可切除：先化疗（新辅助）降期，再评估手术。</li>
+        <li>不可切除：系统化疗为主（FOLFIRINOX 或吉西他滨+白蛋白紫杉醇），放疗用于局部控制；基因检测找靶向/免疫机会。</li>
+      </ul>
+      <h4>胆管癌 / 胆囊癌</h4>
+      <ul>
+        <li>可切除：手术是首选；术后按情况辅助治疗。</li>
+        <li>不可切除：一线吉西他滨+顺铂+免疫（度伐利尤单抗或帕博利珠单抗）；二线按基因结果选药（FGFR2 融合→佩米替尼；IDH1 突变→艾伏尼布；HER2 阳性→抗 HER2 治疗等）。</li>
+      </ul>
+      <h4>十二指肠癌</h4>
+      <ul>
+        <li>可切除：胰十二指肠切除术（Whipple），术后按小肠癌方案辅助化疗。</li>
+        <li>晚期：FOLFOX / FOLFIRI 类方案 + 按基因结果加靶向/免疫。</li>
+      </ul>
+      <h4>甲状腺癌</h4>
+      <ul>
+        <li>分化型：手术（腺叶或全切）→ 高危者碘131 → 终身优甲乐（见下节）。<b>低危微小癌（≤1cm、无高危特征）可以选择「积极监测」不立即手术</b>，国内外指南都认可。</li>
+        <li>髓样癌：全切+淋巴结清扫，查降钙素、做 RET 基因检测。</li>
+        <li>未分化癌：罕见，需多学科团队和临床试验机会。</li>
+      </ul>
+      <h4>胆囊结石（良性）</h4>
+      <ul>
+        <li>有症状（胆绞痛）→ 腹腔镜胆囊切除，是成熟小手术。</li>
+        <li>无症状小结石 → 观察随访；但结石大（≥3cm）、胆囊壁增厚/瓷化、合并息肉等，医生可能建议切除（防远期癌变）。</li>
+        <li>急性胆囊炎 → 急诊抗感染+限期手术。</li>
+      </ul>
+      <h4>胆总管结石</h4>
+      <ul>
+        <li>主要靠 <b>ERCP 取石</b>（经口内镜，可同时切开胆管口 EST）或腹腔镜手术取石。</li>
+        <li><b>急性胆管炎（腹痛+寒战高热+黄疸）是急症</b>，需要急诊 ERCP，千万不要拖。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>治疗手段都是什么（手术 / 介入 / 消融 / 放疗 / 化疗 / 靶向 / 免疫 / 碘131）</summary>
+    <div class="body">
+      <ul>
+        <li><b>手术</b>：根治机会最大的手段，但不是所有分期都适合。</li>
+        <li><b>TACE / HAIC（介入）</b>：把药打到肝脏肿瘤供血动脉里，肝癌常用，创伤小。</li>
+        <li><b>消融（射频/微波）</b>：用热能「烧掉」小病灶，适合早期小肝癌等。</li>
+        <li><b>放疗</b>：用射线杀肿瘤，局部控制用；胰腺癌、胆管癌常用作辅助。</li>
+        <li><b>化疗</b>：全身用药，胰腺癌、胆道癌的一线主力。</li>
+        <li><b>靶向治疗</b>：精准打击特定基因靶点（需基因检测结果匹配）。</li>
+        <li><b>免疫治疗（PD-1/PD-L1 抑制剂）</b>：调动自身免疫系统杀肿瘤，常与化疗/靶向联用。</li>
+        <li><b>碘131</b>：甲状腺癌专属，术后清除残留甲状腺组织和转移灶，需要先低碘饮食准备。</li>
+      </ul>
+      <div class="note">同一个癌种、不同患者方案可能完全不同。家属要问清楚三件事：<b>为什么选这个方案、目的是什么（根治/控制/延长）、副作用是什么</b>。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>化疗 / 靶向 / 免疫治疗的副作用居家管理</summary>
+    <div class="body">
+      <h4>化疗常见副作用</h4>
+      <ul>
+        <li><b>恶心呕吐</b>：止吐药按时吃（预防比治疗有效），少食多餐、清淡。</li>
+        <li><b>骨髓抑制</b>：白细胞/血小板下降。<b>化疗后发热（尤其 38℃ 以上）是急症，立即查血</b>，不要在家硬扛。</li>
+        <li><b>腹泻</b>：补水和电解质，严重时就医。</li>
+        <li><b>手足综合征 / 口腔黏膜炎</b>：保湿、软食、按医嘱用药。</li>
+      </ul>
+      <h4>靶向药常见副作用</h4>
+      <ul>
+        <li><b>高血压</b>：每天量血压，按医嘱处理。</li>
+        <li><b>皮疹 / 手足皮肤反应</b>（索拉非尼、仑伐替尼等常见）：保湿防晒，别抓破。</li>
+        <li><b>蛋白尿、出血倾向</b>：定期复查，注意牙龈出血、皮下瘀斑。</li>
+      </ul>
+      <h4>免疫治疗常见副作用（要学会识别，因为「像小毛病但可能是大事」）</h4>
+      <ul>
+        <li>皮疹/瘙痒、甲状腺功能异常（定期查甲功）。</li>
+        <li><b>免疫性肺炎</b>：干咳、气短 → 及时就医。</li>
+        <li><b>免疫性肝炎</b>：乏力、转氨酶升高 → 复查肝功能。</li>
+        <li><b>免疫性结肠炎</b>：持续腹泻、便血 → 就医。</li>
+        <li><b>心肌炎</b>：胸痛、心慌 → 立即急诊。</li>
+      </ul>
+      <div class="warn"><b>总原则：</b>绝大多数副作用可以管理，但<b>不要因为副作用自行停药、减药</b>；出现上面任何「严重信号」先联系医生或去急诊，带上正在吃的所有药清单。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>甲状腺癌治疗专讲（优甲乐 / 碘131 / 术后注意事项）</summary>
+    <div class="body">
+      <h4>优甲乐（左甲状腺素）——甲状腺术后的「终身朋友」</h4>
+      <ul>
+        <li>作用：① 补充甲状腺素；② 把 TSH 抑制在目标范围，减少复发风险。</li>
+        <li><b>每天早晨空腹服用</b>，与早餐至少间隔 30-60 分钟；与钙片、铁剂、胃药间隔 4 小时以上。</li>
+        <li>剂量由 TSH 决定，需<strong>定期复查甲功调整</strong>；<b>不要自行停药或加量</b>。</li>
+      </ul>
+      <h4>碘131 治疗</h4>
+      <ul>
+        <li>用于中高危分化型甲状腺癌术后「清甲/清灶」；不是所有患者都需要，听医生判断。</li>
+        <li>治疗前 1-2 周<b>低碘饮食</b>：不吃海带、紫菜、海鱼海虾、含碘调味品，用无碘盐。</li>
+        <li>治疗后按医嘱短期隔离（避免与孕妇、婴幼儿密切接触），多喝水、可含酸糖保护唾液腺。</li>
+      </ul>
+      <h4>全切术后要警惕的两件事</h4>
+      <ul>
+        <li><b>低钙</b>：术后甲状旁腺功能受影响，出现手麻、口唇麻木、肌肉抽搐 → <b>及时就医</b>，按医嘱补钙和维生素D。</li>
+        <li><b>颈部出血</b>：术后 24 小时内颈部迅速肿胀、憋气、呼吸困难 → <b>立即呼叫医护/急诊</b>，这是急症。</li>
+      </ul>
+      <div class="note">声音嘶哑可能与喉返神经受牵拉有关，多数会慢慢恢复；持续不缓解需复查。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>临床试验怎么找、怎么入组</summary>
+    <div class="body">
+      <ul>
+        <li>官方查询：<b>国家药监局「药物临床试验登记与信息公示平台」（chinadrugtrials.org.cn）</b>，可按癌种检索。</li>
+        <li>更直接的方式：问你的主治医生所在科室有没有在招募的试验，或去大医院官网/公众号查「临床研究招募」。</li>
+        <li>正规试验：药物和相关检查<b>免费</b>，还有知情同意书和伦理保障。<b>任何以「入组费、押金」为名的都是骗局。</b></li>
+        <li>入组需要符合「入选标准」，不符合也别失落——医生会给出常规治疗建议。</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- ============ 3 居家护理与营养 ============ -->
+  <h2 class="sec" id="s3"><span class="n">3</span>居家护理与营养</h2>
+  <p class="sec-desc">治疗之外，家属能做的最多——吃、睡、疼、症状观察，这一块全讲清楚。</p>
+
+  <details class="topic" open>
+    <summary>营养支持（肝胆胰患者尤其重要）</summary>
+    <div class="body">
+      <ul>
+        <li><b>胰腺/胆道术后</b>：常需<b>胰酶替代</b>（随餐服用，把药混在饭里一起消化），少食多餐、高蛋白高能量。</li>
+        <li><b>胆道梗阻/黄疸期</b>：脂肪吸收差，饮食宜低脂；可用中链甘油三酯（MCT）油/奶粉补能量。</li>
+        <li><b>吃不下、明显消瘦</b>：请营养科会诊，用口服营养补充剂（ONS），必要时肠内/肠外营养——<b>营养支持本身就是治疗的一部分</b>。</li>
+        <li><b>胆囊结石患者</b>：低脂清淡、规律三餐（尤其要吃早餐）、控制体重，忌暴饮暴食。</li>
+      </ul>
+      <div class="warn"><b>最常见的营养误区：</b>「饿死癌细胞」是错的——肿瘤患者营养不良会更快垮掉；「大补」乱吃人参灵芝等，可能与抗凝药、靶向药相互作用，进补前先问医生或营养师。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>黄疸 / 腹水 / 癌痛的家庭护理</summary>
+    <div class="body">
+      <h4>黄疸</h4>
+      <ul>
+        <li>皮肤瘙痒：保持皮肤湿润、涂温和润肤霜，抓破易感染。</li>
+        <li>观察大小便颜色（陶土样便/浓茶样尿提示梗阻加重）；胆管支架/引流术后注意引流管护理和固定。</li>
+      </ul>
+      <h4>腹水</h4>
+      <ul>
+        <li>按医嘱限盐、必要时限水；每天固定时间称体重、量腹围记录。</li>
+        <li>利尿药按时吃；<b>腹围短期明显增大伴呼吸困难 → 就医</b>，可能需要放腹水。</li>
+      </ul>
+      <h4>癌痛（家属最心疼、最无能为力的部分）</h4>
+      <ul>
+        <li>三阶梯止痛：按时、按量服药，<b>不要「忍」，不要等疼了才吃</b>——规律给药才能把痛压在萌芽里。</li>
+        <li>「吃止痛药会上瘾」是最大误区：癌痛规范用药成瘾率极低，疼痛控制比「怕上瘾」重要得多。</li>
+        <li>吗啡类常见便秘：预防性处理（多喝水、按医嘱用缓泻剂）；恶心多在初期，之后会缓解。</li>
+        <li>疼痛控制不好：<b>主动找医生调方案</b>，肿瘤科有专门的疼痛门诊。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>甲状腺术后居家护理</summary>
+    <div class="body">
+      <ul>
+        <li>切口：保持干燥清洁，按医嘱换药拆线；睡觉可垫高枕头。</li>
+        <li>声音：嘶哑多数可恢复，少说话、别大喊；持续不缓解复查声带。</li>
+        <li>低钙：手麻、口唇麻、抽搐 → 及时就医，按医嘱补钙。</li>
+        <li>优甲乐规律服药（见第 2 部分「甲状腺癌专讲」）；定期复查甲功和 Tg、超声。</li>
+        <li>碘131 前后按医嘱低碘饮食和隔离。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>胆囊结石 / 胆总管结石 / ERCP 术后注意事项</summary>
+    <div class="body">
+      <ul>
+        <li><b>未手术的胆囊结石</b>：低脂规律饮食，避免暴饮暴食；胆绞痛发作（右上腹剧痛、可放射到右肩背）时先禁食、就医。</li>
+        <li><b>ERCP 取石术后</b>：按医嘱短暂禁食后逐步恢复饮食；观察有无腹痛、发热、黄疸——这些可能是胆管炎或胰腺炎再发的信号。</li>
+        <li><b>急性胆管炎信号（务必记住）</b>：<b>腹痛 + 寒战高热 + 黄疸</b>（Charcot 三联征），是危及生命的急症，立即急诊。</li>
+        <li>胆总管结石取石后仍有复发可能，按医生要求复查（超声/MRCP），出现症状别拖。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>家属怎么沟通、怎么陪（心理支持）</summary>
+    <div class="body">
+      <ul>
+        <li><b>告知策略</b>：尊重患者意愿——多数专家建议逐步、坦诚告知，患者有权利参与决策；「全瞒着」往往造成更大的猜疑和情绪反弹。</li>
+        <li><b>让患者保留选择权</b>：治疗决策尽量让本人参与（分期、风险讲清楚后由本人定），这能显著减少「被安排感」和焦虑。</li>
+        <li><b>陪伴技巧</b>：多倾听、少建议；不说「你要坚强」这种压力话，说「我在，我们一起想办法」。</li>
+        <li><b>家属也要照顾自己</b>：允许自己崩溃和休息，找病友群或心理科支持；你垮了，患者更没依靠。</li>
+        <li>记录症状和问题清单，每次复查前写好，见医生时逐条问（见第 6 部分模板）。</li>
+      </ul>
+    </div>
+  </details>
+
+  <!-- ============ 4 钱与资源 ============ -->
+  <h2 class="sec" id="s4"><span class="n">4</span>钱与资源</h2>
+  <p class="sec-desc">问得最多、最没人系统讲的部分。所有报销政策以当地医保局和医院为准。</p>
+
+  <details class="topic" open>
+    <summary>医保、大病保险、惠民保、双通道</summary>
+    <div class="body">
+      <ul>
+        <li><b>基本医保</b>：目录内药品分甲类（全报一部分）和乙类（先自付一部分再报销）；目录外（丙类）自费。</li>
+        <li><b>大病保险</b>：基本医保报完后，个人负担超过起付线的部分可「二次报销」，无需另外投保，自动结算。</li>
+        <li><b>医疗救助</b>：低保、特困等困难家庭可向民政/医保部门申请。</li>
+        <li><b>惠民保</b>：各地城市定制型商业补充医疗险（如沪惠保、穗岁康等），投保门槛低、保费便宜，对既往症常有一定保障——<b>建议关注自己城市的版本</b>。</li>
+        <li><b>双通道</b>：部分国谈药可凭医生处方在「双通道药店」购药并报销，问医院医保办怎么走流程。</li>
+        <li><b>异地就医</b>：跨省看病先办「异地就医备案」（国家医保服务平台 App 可办），报销比例和流程更顺。</li>
+      </ul>
+      <div class="note">用自费药前先问医生：进没进医保、报多少、有没有替代方案；医院有「医保办」窗口，具体问题直接去问。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>慈善援助与患者援助项目</summary>
+    <div class="body">
+      <ul>
+        <li>正规的患者援助项目（赠药/费用减免）通常通过<b>中华慈善总会、中国初级卫生保健基金会、白求恩公益基金会</b>等机构执行，项目随药企政策变化，<b>以项目方最新公告为准</b>。</li>
+        <li>获取方式：问主治医生或医院药房、药学门诊；基金会有官网和热线，注意核实真伪。</li>
+        <li>大病众筹（水滴筹等）：慎用，注意隐私泄露和亲友负担；先走完医保、大病保险、医疗救助、惠民保再考虑。</li>
+      </ul>
+      <div class="warn"><b>防骗：</b>正规援助项目不收取任何「代办费、手续费」。任何声称「帮你操作援助、先交钱」的都是诈骗。</div>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>随访时间表（术后 / 结节 / 结石）</summary>
+    <div class="body">
+      <ul>
+        <li><b>肝胆胰、十二指肠恶性肿瘤术后</b>：一般术后 2 年内每 3 个月复查（肿瘤标志物+影像），2-5 年每 6 个月，5 年后每年——<b>以主管医生的书面计划为准</b>。</li>
+        <li><b>甲状腺癌术后</b>：术后前 2 年每 6-12 个月查甲功+Tg+颈部超声，稳定后延长间隔。</li>
+        <li><b>甲状腺良性结节</b>：6-12 个月复查超声，连续稳定可延长至 1-2 年。</li>
+        <li><b>胆囊结石（未手术）</b>：每年一次超声+症状评估；胆总管结石取石后按医嘱复查。</li>
+      </ul>
+      <div class="note">每次复查带齐：出院小结、病理报告、影像原片、既往化验单、用药清单（含剂量）。</div>
+    </div>
+  </details>
+
+  <!-- ============ 5 急诊警示 ============ -->
+  <h2 class="sec" id="s5"><span class="n">5</span>急诊警示清单</h2>
+  <p class="sec-desc" style="color:var(--red);">这一节值得截图保存。出现下列任何情况，立即联系医生或去急诊，不要先在网上搜答案。</p>
+
+  <div class="card" style="border-color:#f3ccc8; background:#fff;">
+    <div class="alert-li"><span class="mark">立即</span><p><b>呕血、黑便（柏油样便）</b>——消化道出血。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>剧烈腹痛、腹痛持续不缓解</b>——尤其胆囊结石/胆总管结石患者，警惕急性胆囊炎、胆管炎、胰腺炎。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>腹痛 + 寒战高热 + 黄疸</b>——急性胆管炎，可危及生命。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>化疗/免疫治疗后发热 ≥38℃</b>——可能粒缺或感染，先查血，不要在家扛。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>干咳、气短、呼吸困难</b>——警惕免疫性肺炎、肺栓塞、大量胸腹水。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>腹围短期明显增大、憋气</b>——大量腹水。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>意识模糊、嗜睡、胡言乱语</b>——警惕肝性脑病（肝病患者尤其注意）。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>甲状腺全切术后：手麻口唇麻、肌肉抽搐</b>——急性低钙。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>颈部/手术区迅速肿胀、憋气、呼吸困难</b>——术后出血压迫气道。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>胸痛、心慌、晕厥</b>——警惕心肌炎（免疫治疗相关）或心血管事件。</p></div>
+    <div class="alert-li"><span class="mark">立即</span><p><b>外伤性摔倒后意识改变、或长期卧床者突发单侧肢体无力</b>——警惕脑出血/脑梗。</p></div>
+    <p style="font-size:13.5px; color:var(--ink-3); margin-top:8px;">去急诊时带：病历本、出院小结、正在服用的所有药物（或清单）、最近的检查报告。</p>
+  </div>
+
+  <!-- ============ 6 就医实用贴士 ============ -->
+  <h2 class="sec" id="s6"><span class="n">6</span>就医实用贴士</h2>
+
+  <details class="topic" open>
+    <summary>看门诊 / 复查前准备什么（清单模板）</summary>
+    <div class="body">
+      <ul>
+        <li>带齐资料：病理报告、出院小结、影像原片（光盘/二维码）、历次化验单、用药清单。</li>
+        <li>把想问的问题提前写在手机备忘录里，逐条问，别当场忘。</li>
+        <li>对诊断有疑虑可申请<strong>病理会诊 / 影像会诊</strong>（挂大医院的「会诊号」，带切片/原片）。</li>
+        <li>复杂肿瘤主动问：<b>「我的情况需要多学科会诊（MDT）吗？」</b>——外科、内科、放疗、病理一起讨论往往更稳妥。</li>
+      </ul>
+    </div>
+  </details>
+
+  <details class="topic">
+    <summary>见医生必问清单（万能模板）</summary>
+    <div class="body">
+      <ul>
+        <li>我/家人的诊断和分期是什么？治疗目标是什么（根治/控制/延长）？</li>
+        <li>这个方案为什么适合？有没有替代方案？各自的利弊？</li>
+        <li>副作用有哪些？出现什么情况需要联系您/去急诊？</li>
+        <li>下一步什么时候复查？查什么？</li>
+        <li>有没有临床研究或慈善援助的机会？</li>
+        <li>回家后饮食、活动、服药有什么特别注意？</li>
+      </ul>
+    </div>
+  </details>
+
+  <footer>
+    <p><strong>关于本手册</strong>：公益性质，可自由复制、免费部署和分享（上传到 GitHub Pages / Gitee Pages / Netlify 等静态托管即可获得公开网址）。</p>
+    <p>内容核对至 2026 年 9 月；治疗、报销、援助政策会随时间变化，使用前请核对最新指南、药品说明书与当地医保政策。</p>
+    <p>本手册不构成诊疗建议。出现紧急情况请立即就医，不要在手机上查答案耽误时间。</p>
+  </footer>
+
+</div>
+</body>
+</html>
