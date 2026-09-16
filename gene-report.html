@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<!--
+  肿瘤基因检测解读助手（肝胆胰·十二指肠癌版）
+  - 单文件、离线可用、不上传任何数据（数据仅在本机浏览器内处理）
+  - 部署：把本文件上传到 GitHub 仓库 → Settings → Pages → 选择分支和根目录 → 保存，
+    即可获得免费公开网址（也可用 Gitee Pages / Netlify / Vercel 等免费静态托管）
+  - 知识库数据截至 2026 年 9 月，药物获批与医保状态会变化，使用前请核对最新说明书与指南
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>肿瘤基因检测解读助手 · 肝胆胰·十二指肠癌版</title>
+<style>
+:root{
+  --teal:#0f766e; --teal-d:#0b4f4a; --teal-l:#e6f4f2;
+  --bg:#f5faf9; --card:#ffffff; --line:#e3edeb;
+  --ink:#1b2b29; --ink-2:#4d605d; --ink-3:#7a8b88;
+  --amber:#b26a00; --amber-l:#fdf3e0;
+  --blue:#1d5fa8; --blue-l:#e8f1fb;
+  --green:#0a7a4e; --green-l:#e6f7ef;
+  --purple:#7c3aed; --purple-l:#f4ecfb;
+  --red:#b3261e; --red-l:#fdecea;
+  --radius:14px;
+  --shadow:0 1px 3px rgba(11,79,74,.06), 0 6px 20px rgba(11,79,74,.06);
+}
+*{box-sizing:border-box; margin:0; padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans SC",system-ui,sans-serif;
+  background:var(--bg); color:var(--ink); font-size:16px; line-height:1.75;
+}
+.wrap{max-width:780px; margin:0 auto; padding:0 16px 60px;}
+a{color:var(--teal);}
+h1,h2,h3,h4{line-height:1.35;}
+
+/* 顶部 */
+header.top{background:linear-gradient(135deg,var(--teal-d) 0%,var(--teal) 60%,#12a394 100%); color:#fff; padding:34px 16px 26px;}
+header.top .wrap{max-width:780px;}
+header.top h1{font-size:24px; letter-spacing:.5px;}
+header.top .sub{margin-top:6px; font-size:14.5px; opacity:.92;}
+header.top .meta{margin-top:12px; display:flex; flex-wrap:wrap; gap:8px;}
+.pill{display:inline-block; padding:3px 11px; border-radius:999px; font-size:12.5px; background:rgba(255,255,255,.16); border:1px solid rgba(255,255,255,.28);}
+
+/* 步骤 */
+.step{margin-top:26px;}
+.step-num{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+.step-num .n{
+  width:30px; height:30px; border-radius:9px; background:var(--teal); color:#fff;
+  display:flex; align-items:center; justify-content:center; font-weight:700; font-size:15px; flex:none;
+}
+.step-num h2{font-size:19px;}
+.step-desc{color:var(--ink-2); font-size:14px; margin-bottom:14px;}
+
+.card{background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:18px;}
+.card + .card{margin-top:14px;}
+
+/* 癌种选择 */
+.cancer-grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px;}
+.cancer-opt{
+  border:1.5px solid var(--line); border-radius:12px; background:#fff; padding:13px 10px;
+  text-align:center; font-size:15px; cursor:pointer; transition:all .15s; color:var(--ink);
+}
+.cancer-opt:hover{border-color:var(--teal);}
+.cancer-opt.on{background:var(--teal-l); border-color:var(--teal); color:var(--teal-d); font-weight:600;}
+
+/* 选项卡 */
+.tabs{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+.tab{
+  padding:8px 16px; border-radius:999px; border:1.5px solid var(--line); background:#fff;
+  font-size:14.5px; cursor:pointer; color:var(--ink-2);
+}
+.tab.on{background:var(--teal); border-color:var(--teal); color:#fff; font-weight:600;}
+.pane{display:none;}
+.pane.on{display:block;}
+
+/* 速选 chips */
+.chip-group{margin-bottom:14px;}
+.chip-group h4{font-size:14px; color:var(--ink-2); margin-bottom:8px; font-weight:600;}
+.chips{display:flex; flex-wrap:wrap; gap:8px;}
+.chip{
+  padding:7px 14px; border-radius:999px; border:1.5px solid var(--line); background:#fff;
+  font-size:14px; cursor:pointer; color:var(--ink); transition:all .12s;
+}
+.chip:hover{border-color:var(--teal);}
+.chip.on{background:var(--teal-l); border-color:var(--teal); color:var(--teal-d); font-weight:600;}
+
+/* 手动输入 */
+.manual-row{display:flex; gap:10px; flex-wrap:wrap;}
+.field{flex:1 1 160px;}
+.field label{display:block; font-size:13px; color:var(--ink-3); margin-bottom:5px;}
+input[type=text], select, textarea{
+  width:100%; padding:11px 13px; border:1.5px solid var(--line); border-radius:10px;
+  font-size:15px; font-family:inherit; background:#fff; color:var(--ink);
+}
+input:focus, select:focus, textarea:focus{outline:none; border-color:var(--teal); box-shadow:0 0 0 3px rgba(15,118,110,.12);}
+textarea{resize:vertical; min-height:110px;}
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:6px;
+  padding:12px 22px; border:none; border-radius:11px; font-size:15.5px; font-weight:600;
+  cursor:pointer; font-family:inherit; transition:all .15s;
+}
+.btn-pri{background:var(--teal); color:#fff;}
+.btn-pri:hover{background:var(--teal-d);}
+.btn-sec{background:#fff; border:1.5px solid var(--line); color:var(--ink-2);}
+.btn-sec:hover{border-color:var(--teal); color:var(--teal-d);}
+.btn-sm{padding:7px 14px; font-size:13.5px; font-weight:500;}
+.btn-danger{background:var(--red-l); color:var(--red); border:1.5px solid #f2c4c1;}
+.btn-danger:hover{border-color:var(--red);}
+
+/* 已选列表 */
+.item-row{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  background:#fff; border:1px solid var(--line); border-radius:12px; padding:10px 14px; margin-top:10px;
+}
+.item-row .gname{font-weight:700; min-width:90px;}
+.item-row select{width:auto; flex:0 1 170px; padding:8px 10px; font-size:14px;}
+.item-row input[type=text]{flex:1 1 160px; padding:8px 10px; font-size:14px;}
+.item-row .rm{
+  width:30px; height:30px; border-radius:8px; border:1.5px solid var(--line); background:#fff;
+  color:var(--ink-3); font-size:16px; cursor:pointer; flex:none;
+}
+.item-row .rm:hover{border-color:var(--red); color:var(--red);}
+
+/* 主按钮 */
+.analyze-bar{display:flex; gap:10px; align-items:center; margin-top:18px; flex-wrap:wrap;}
+.analyze-bar .btn-pri{flex:1 1 220px; font-size:16.5px; padding:14px 22px;}
+.hint{font-size:13px; color:var(--ink-3); margin-top:10px;}
+
+/* 结果 */
+#results{margin-top:30px;}
+.summary-strip{
+  background:linear-gradient(135deg,var(--teal-d),var(--teal)); color:#fff; border-radius:var(--radius);
+  padding:18px 20px; display:flex; flex-wrap:wrap; gap:12px 26px; align-items:center;
+}
+.summary-strip .kv b{font-size:22px; display:block; line-height:1.2;}
+.summary-strip .kv span{font-size:12.5px; opacity:.85;}
+.tl-card{background:var(--teal-l); border:1px solid #bfe3dd; border-radius:var(--radius); padding:16px 18px; margin-top:14px;}
+.tl-card h3{color:var(--teal-d); font-size:16px; margin-bottom:6px;}
+.warn-card{background:var(--red-l); border:1px solid #f3ccc8; border-radius:var(--radius); padding:14px 16px; margin-top:14px; font-size:14px;}
+.warn-card b{color:var(--red);}
+
+.section-title{font-size:18px; margin:26px 0 12px; display:flex; align-items:center; gap:8px;}
+.section-title::before{content:""; width:5px; height:20px; border-radius:3px; background:var(--teal);}
+
+/* 基因卡片 */
+.gene-card .gc-head{display:flex; align-items:center; gap:10px; flex-wrap:wrap; margin-bottom:4px;}
+.gene-card .gc-head h3{font-size:19px;}
+.type-badge{background:var(--blue-l); color:var(--blue); border-radius:999px; padding:2px 11px; font-size:13px; font-weight:600;}
+.gc-section{padding:9px 0; border-top:1px dashed var(--line);}
+.gc-section h4{font-size:13.5px; color:var(--ink-3); margin-bottom:3px; font-weight:600;}
+.gc-section p{font-size:15px;}
+.gc-section.target h4, .gc-section.hered h4, .gc-section.ask h4{color:var(--teal-d);}
+.gc-section.hered{background:var(--purple-l); border-radius:10px; padding:10px 12px; border:none; margin-top:6px;}
+.gc-section.ask{background:#f7faf9; border-radius:10px; padding:10px 12px; border:none; margin-top:6px;}
+.gc-section.ask ul{margin-left:18px;}
+.gc-section.ask li{margin:3px 0; font-size:14.5px;}
+.gc-head h3{margin:0;}
+#askBox h3{font-size:16px;color:var(--teal-d);margin-bottom:8px;}
+#askBox ul{margin-left:18px;}
+#askBox li{margin:4px 0;}
+details.treat .body h3{font-size:15.5px;color:var(--teal-d);margin-bottom:6px;}
+
+.badge{display:inline-block; border-radius:999px; padding:2px 11px; font-size:12.5px; font-weight:600; margin-right:8px; vertical-align:1px;}
+.b-cn{background:var(--green-l); color:var(--green); border:1px solid #bfe6d2;}
+.b-ov{background:var(--blue-l); color:var(--blue); border:1px solid #c4d9f0;}
+.b-guide{background:#eafaf6; color:#0b7d66; border:1px solid #bdeadd;}
+.b-trial{background:var(--amber-l); color:var(--amber); border:1px solid #f0dcb5;}
+.b-none{background:#eef1f1; color:#5b6b6a; border:1px solid #dde3e2;}
+.b-ask{background:var(--purple-l); color:var(--purple); border:1px solid #ddcdf5;}
+.b-red{background:var(--red-l); color:var(--red); border:1px solid #f2c4c1;}
+
+.unmatched{background:var(--amber-l); border:1px solid #f0dcb5;}
+
+details.treat{margin-top:14px;}
+details.treat summary{
+  cursor:pointer; font-weight:600; color:var(--teal-d); font-size:15px; padding:12px 14px;
+  background:var(--teal-l); border-radius:12px; list-style:none;
+}
+details.treat summary::-webkit-details-marker{display:none;}
+details.treat summary::after{content:"▾"; float:right; opacity:.6;}
+details.treat[open] summary::after{content:"▴";}
+details.treat .body{padding:14px 16px; border:1px solid var(--line); border-top:none; border-radius:0 0 12px 12px; font-size:14.5px;}
+details.treat .body li{margin:6px 0;}
+
+/* 术语表 */
+details.gloss{margin-top:14px;}
+details.gloss summary{
+  cursor:pointer; font-weight:600; color:var(--ink-2); font-size:15px; padding:12px 14px;
+  background:#fff; border:1px solid var(--line); border-radius:12px; list-style:none;
+}
+details.gloss summary::-webkit-details-marker{display:none;}
+details.gloss summary::after{content:"▾"; float:right; opacity:.6;}
+details.gloss[open] summary::after{content:"▴";}
+details.gloss .body{padding:12px 16px; border:1px solid var(--line); border-top:none; border-radius:0 0 12px 12px;}
+details.gloss .body dt{font-weight:600; margin-top:10px; font-size:15px; color:var(--teal-d);}
+details.gloss .body dd{margin:2px 0 6px 0; font-size:14.5px; color:var(--ink-2);}
+
+footer{margin-top:36px; border-top:1px solid var(--line); padding-top:16px; font-size:13px; color:var(--ink-3);}
+footer p{margin:4px 0;}
+
+.no-print{}
+
+@media print{
+  body{background:#fff; font-size:12.5px;}
+  .no-print{display:none !important;}
+  .wrap{max-width:100%; padding:0;}
+  .card{box-shadow:none; border:1px solid #ccc; break-inside:avoid;}
+  #results{margin-top:0;}
+  header.top{background:#fff !important; color:#000; border-bottom:2px solid #333; padding:10px 0;}
+  header.top .pill{border-color:#999; color:#333; background:#fff;}
+  a{color:#000; text-decoration:none;}
+}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <h1>肿瘤基因检测解读助手</h1>
+    <div class="sub">面向患者的检测报告「翻译器」：把基因突变、靶向治疗、化疗、预后指标讲成人话 · 肝胆胰与十二指肠癌版</div>
+    <div class="meta">
+      <span class="pill">免费 · 离线可用</span>
+      <span class="pill">数据仅在本机浏览器处理，不上传</span>
+      <span class="pill">知识库数据截至 2026 年 9 月</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <!-- 第一步：癌种 -->
+  <section class="step no-print" id="stepCancer">
+    <div class="step-num"><span class="n">1</span><h2>您的癌种是？</h2></div>
+    <div class="step-desc">选择癌种后，解读会按该癌种的实际情况输出。不确定就选「不确定/多癌种」。</div>
+    <div class="card">
+      <div class="cancer-grid" id="cancerGrid"></div>
+    </div>
+  </section>
+
+  <!-- 第二步：输入 -->
+  <section class="step no-print" id="stepInput">
+    <div class="step-num"><span class="n">2</span><h2>录入检测结果</h2></div>
+    <div class="step-desc">三种方式任选其一，可混合使用：从速选列表点选（最简单）、手动输入、或直接粘贴报告文字自动识别。</div>
+    <div class="card">
+      <div class="tabs">
+        <button class="tab on" data-tab="quick">速选</button>
+        <button class="tab" data-tab="manual">手动输入</button>
+        <button class="tab" data-tab="paste">粘贴报告识别</button>
+      </div>
+
+      <div class="pane on" id="pane-quick">
+        <div id="chipGroups"></div>
+      </div>
+
+      <div class="pane" id="pane-manual">
+        <div class="manual-row">
+          <div class="field">
+            <label>基因 / 标志物</label>
+            <input type="text" id="mGene" list="geneList" placeholder="如 KRAS、FGFR2、MSI-H…">
+            <datalist id="geneList"></datalist>
+          </div>
+          <div class="field">
+            <label>变异类型</label>
+            <select id="mType"></select>
+          </div>
+          <div class="field" style="flex-basis:200px;">
+            <label>变异详情（可选）</label>
+            <input type="text" id="mDetail" placeholder="如 G12C、R132、*6、CPS=20…">
+          </div>
+        </div>
+        <div style="margin-top:12px;"><button class="btn btn-sec" id="btnAdd">添加到列表</button></div>
+      </div>
+
+      <div class="pane" id="pane-paste">
+        <label style="font-size:13px;color:var(--ink-3);">把报告里的「基因检测结果」文字段粘贴到这里（可整段粘贴，识别后请核对）：</label>
+        <textarea id="pasteBox" placeholder="例如：KRAS G12D 突变 检出；MSI-H；TMB 12 mut/Mb；UGT1A1*6 杂合；FGFR2 融合（BICC1）检出……"></textarea>
+        <div style="margin-top:12px;"><button class="btn btn-sec" id="btnScan">自动识别并添加</button></div>
+      </div>
+    </div>
+
+    <div class="card" id="selectedCard">
+      <h4 style="font-size:15px;color:var(--ink-2);margin-bottom:6px;">已录入的项目（可修改类型 / 补充详情）</h4>
+      <div id="itemList"></div>
+      <p class="hint" id="emptyHint">还没有项目。请在上面点选或输入检测到的基因/标志物，也可以直接粘贴报告文字。</p>
+    </div>
+
+    <div class="analyze-bar">
+      <button class="btn btn-pri" id="btnAnalyze">生成患者版解读</button>
+      <button class="btn btn-sec" id="btnClear">清空</button>
+    </div>
+    <p class="hint">进度会自动保存在您自己的浏览器里，关闭页面再打开仍在；不会上传到任何服务器。</p>
+  </section>
+
+  <!-- 结果 -->
+  <section id="results" hidden>
+    <div class="step-num"><span class="n">3</span><h2>您的解读结果</h2></div>
+    <div class="no-print" style="display:flex;gap:10px;margin-bottom:14px;flex-wrap:wrap;">
+      <button class="btn btn-sec btn-sm" id="btnPrint">打印 / 保存为 PDF</button>
+      <button class="btn btn-sec btn-sm" id="btnBack" onclick="window.scrollTo({top:0,behavior:'smooth'})">返回修改</button>
+    </div>
+    <div class="summary-strip" id="summaryStrip"></div>
+    <div class="tl-card" id="tlCard"></div>
+    <div class="warn-card"><b>请记住：</b>本页是「翻译」和患者教育，不是处方。治疗决定请以主治医生结合分期、病理、影像和体能状态的综合意见为准；药物可及性、医保报销请向医院和当地医保确认。</div>
+    <div id="resultsBody"></div>
+    <details class="treat no-print">
+      <summary>各癌种治疗常识（背景知识）</summary>
+      <div class="body" id="treatBox"></div>
+    </details>
+    <div class="card" id="askBox" style="margin-top:14px;"></div>
+  </section>
+
+  <!-- 术语表 -->
+  <section class="step no-print">
+    <div class="step-num"><span class="n" style="background:var(--ink-2);">?</span><h2>报告常见术语速查</h2></div>
+    <details class="gloss">
+      <summary>点开查看 18 个高频术语的通俗解释</summary>
+      <div class="body">
+        <dl>
+          <dt>基因突变（体细胞突变）</dt><dd>肿瘤细胞里「写错」的基因。大多数癌症突变只存在于肿瘤里，不遗传。</dd>
+          <dt>胚系突变 vs 体细胞突变</dt><dd>胚系突变：出生就有、全身细胞都有，可能遗传给子女；体细胞突变：只在肿瘤里、不遗传。报告通常会标注，必要时用血液对照确认。</dd>
+          <dt>驱动基因</dt><dd>直接推动肿瘤生长的关键基因，常是靶向药的「靶子」。</dd>
+          <dt>基因扩增</dt><dd>某段基因的「拷贝数」异常变多，相当于把信号放大。</dd>
+          <dt>基因融合 / 重排</dt><dd>两段基因「粘在一起」形成异常基因，持续发送生长信号（如 FGFR2、NTRK 融合）。</dd>
+          <dt>靶向治疗</dt><dd>精准打击特定基因靶点的药物，作用像「钥匙锁孔」一一对应，副作用常比化疗小。</dd>
+          <dt>免疫治疗（PD-1/PD-L1 抑制剂）</dt><dd>解除肿瘤对免疫系统的「蒙蔽」，让身体自己的免疫细胞去杀肿瘤。</dd>
+          <dt>MSI-H / dMMR</dt><dd>微卫星不稳定：肿瘤 DNA「校对系统」失灵，错误多，免疫治疗效果常特别好。</dd>
+          <dt>TMB（肿瘤突变负荷）</dt><dd>肿瘤里基因错误的「总量」。错误越多，免疫治疗越可能有效。</dd>
+          <dt>PD-L1 表达（CPS/TPS）</dt><dd>肿瘤细胞「出示通行证」的比例，可辅助预测免疫治疗效果。注意：胆道癌、肝癌的免疫联合方案获批并不强制要求 PD-L1 阳性。</dd>
+          <dt>HER2（IHC 3+/2+、FISH）</dt><dd>一种生长信号蛋白；检测方式有免疫组化（IHC）和 FISH 等，结果分级（0/1+/2+/3+）决定是否适合抗 HER2 治疗。</dd>
+          <dt>化疗药敏 / 毒性基因检测</dt><dd>用基因预测某类化疗药的敏感度或副作用风险（如 UGT1A1、DPYD）。毒性预测较可靠；「药敏」类证据有限，仅作参考。</dd>
+          <dt>肿瘤标志物</dt><dd>抽血可测的蛋白指标（肝癌 AFP、胰腺/胆道 CA19-9、CEA 等），用于监测，不能单独诊断。</dd>
+          <dt>TNM 分期 / 病理报告</dt><dd>决定治疗的基石：肿瘤大小（T）、淋巴结（N）、转移（M）和病理类型。基因结果只是补充，不能替代分期。</dd>
+          <dt>ORR / PFS / OS</dt><dd>ORR=肿瘤缩小的患者比例；PFS=无进展生存时间；OS=总生存时间。临床试验里衡量药物有效性的指标。</dd>
+          <dt>ctDNA / MRD</dt><dd>肿瘤细胞释放到血液里的 DNA 碎片（液体活检）。MRD=治疗后血液仍能测到，提示复发风险较高，用于疗效监测。</dd>
+          <dt>HRD（同源重组缺陷）</dt><dd>DNA 修复系统整体失灵（常因 BRCA、PALB2 等突变），这类肿瘤对铂类和 PARP 抑制剂更敏感。</dd>
+          <dt>多学科会诊（MDT）</dt><dd>外科、内科、放疗、病理、影像等多科医生一起讨论病情——复杂肿瘤建议主动要求。</dd>
+        </dl>
+      </div>
+    </details>
+  </section>
+
+  <!-- 免责声明 -->
+  <section class="step no-print">
+    <div class="card" style="border-color:#f0dcb5;background:#fffdf7;">
+      <h4 style="color:var(--amber);font-size:15px;margin-bottom:6px;">重要声明（请先阅读）</h4>
+      <p style="font-size:13.5px;color:var(--ink-2);">
+        本工具由医学研究者制作，仅用于<strong>患者教育</strong>和报告入门解读，不构成诊断、处方或治疗建议。
+        基因结果只是治疗的众多因素之一，真正决策必须由主治医生结合<strong>分期、病理、影像、体能状态、既往治疗与医保政策</strong>综合判断。
+        药物获批和医保状态随时间变化，本工具数据截至 2026 年 9 月，使用前请核对最新药品说明书与国家医保目录。
+        请勿因本工具内容自行停药、换药或拒绝医生建议。如报告提示胚系（遗传）突变，请务必进行遗传咨询。
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>关于本工具</strong>：公益性质，可自由复制、免费部署和分享。部署到 GitHub Pages / Gitee Pages / Netlify / Vercel 等免费静态托管即可获得公开网址。</p>
+    <p>知识库依据：药品说明书、NCCN/CSCO 指南及公开获批信息（2026-09 核对）。发现错误或想补充基因条目，请联系开发者更新。</p>
+    <p>如情况紧急或症状加重，请立即就医。本工具不能替代任何医生的当面诊疗。</p>
+  </footer>
+</div>
+
+<script>
+"use strict";
+/* ========== 数据与常量 ========== */
+var CANCERS=["肝癌","胰腺癌","胆管癌","胆囊癌","十二指肠癌"];
+var TYPE_OPTIONS=["未标注/不确定","突变","扩增/拷贝数增加","融合/重排","缺失/丢失","过表达","MSI-H","TMB-H","PD-L1阳性","胚系突变"];
+var BADGE_CLS={"国内已获批":"b-cn","国外获批/指南推荐":"b-ov","指南推荐参考":"b-guide","临床研究/证据有限":"b-trial","目前无获批靶向药":"b-none","需医生评估":"b-ask"};
+
+var KB=[
+{id:"KRAS",gene:"KRAS",aliases:["kras","k-ras"],plain:"KRAS 像汽车上的「油门踏板」，掌管细胞分裂。突变后踏板被卡死，肿瘤细胞不停增殖。它是胰腺癌等消化系统肿瘤里最常见的驱动基因之一。",
+ freq:{"肝癌":"少见（<5%）","胰腺癌":"约 90%（其中 G12D 最常见，G12C 约 1-2%）","胆管癌":"肝内约 20%、肝外约 40%","胆囊癌":"约 40%","十二指肠癌":"约 30-50%"},
+ targetBadge:"目前无获批靶向药",
+ targetText:"针对最常见的 KRAS 突变亚型（如 G12D、G12V、G12R）的靶向药仍在临床研究阶段。注意：如果检测到的是 <b>G12C</b> 亚型，请务必告诉医生——它有专门药物（见下）。",
+ chemo:"KRAS 突变本身不改变化疗选择。胰腺癌一线常用 FOLFIRINOX 或吉西他滨+白蛋白紫杉醇；胆道/胆囊/十二指肠癌多用含吉西他滨或氟尿嘧啶的方案。",
+ prognosis:"胰腺癌约九成患者都携带 KRAS 突变，它提示肿瘤恶性度高、预后相对偏差，但这绝不等于无药可治，标准化疗/免疫联合仍是主线。",
+ ask:["我的 KRAS 是哪种亚型（G12D / G12C / 其他）？目前有没有针对它的治疗或临床研究？","这个突变对复发风险和随访频率有影响吗？"]},
+{id:"TP53",gene:"TP53",aliases:["tp53","p53","p53基因"],plain:"TP53 被称为「基因组守护者」，负责修复 DNA 损伤、在细胞出错时叫停分裂。它突变等于「刹车失灵」，细胞更容易积累更多错误、变得更恶性。",
+ freq:{"肝癌":"约 30%","胰腺癌":"约 50-70%","胆管癌":"约 30-40%","胆囊癌":"约 50%","十二指肠癌":"约 40%"},
+ targetBadge:"目前无获批靶向药",
+ targetText:"目前没有直接针对 TP53 的获批靶向药；相关药物（如 p53-MDM2 抑制剂）处于临床研究阶段。",
+ chemo:"TP53 突变通常不影响化疗方案选择，医生仍会按癌种标准方案治疗。",
+ prognosis:"TP53 突变一般提示肿瘤侵袭性较强、复发风险较高，需要更密切的随访——但这只是众多因素之一。",
+ hereditary:"若报告明确标注 TP53 为<b>胚系</b>致病突变（非常少见），与 Li-Fraumeni 综合征相关，应进行遗传咨询。",
+ ask:["TP53 突变对我复发风险和复查计划有什么影响？"]},
+{id:"TERT",gene:"TERT启动子",aliases:["tert","tert启动子","端粒酶"],plain:"TERT 负责维持染色体末端的「保护帽」（端粒），让细胞能持续分裂。启动子区域突变相当于打开了「永续分裂」的开关，是肝癌最常见的分子事件之一。",
+ freq:{"肝癌":"约 50-60%","默认":"少见"},
+ targetBadge:"目前无获批靶向药",
+ targetText:"目前没有直接针对 TERT 启动子突变的获批药物。",
+ chemo:"不影响常规化疗选择。",
+ prognosis:"在肝癌中常见，多与其他分子事件共存；对预后的影响需结合整体分期判断，主要作为分型和辅助指标。",
+ ask:["这个突变对肝癌分型和后续治疗选择有影响吗？"]},
+{id:"CTNNB1",gene:"CTNNB1",aliases:["ctnnb1","β-catenin","betacatenin"],plain:"CTNNB1 编码 β-catenin 蛋白，是细胞「通讯系统」（Wnt 通路）的核心。突变会让这条通路持续激活，推动肿瘤生长。",
+ freq:{"肝癌":"约 25-35%","默认":"少见"},
+ targetBadge:"目前无获批靶向药",
+ targetText:"目前没有获批的 Wnt 通路靶向药，相关药物处于研究阶段。部分研究提示 CTNNB1 突变的肝癌对 PD-1 单药治疗应答可能较差，但免疫联合方案（如免疫+抗血管生成）通常仍可使用，请与医生确认。",
+ chemo:"不影响化疗选择。",
+ prognosis:"在肝癌中常见，预后需结合分期综合判断。",
+ ask:["如果考虑免疫治疗，这个突变会不会影响疗效？"]},
+{id:"ARID",gene:"ARID1A/ARID2",aliases:["arid1a","arid2","arid"],plain:"这两个基因负责「整理书架」——把 DNA 包装成合适的形状以便读取。突变会让基因表达紊乱，是胆管癌和肝癌中常见的早期事件。",
+ freq:{"肝癌":"约 10-20%","胆管癌":"肝内约 15-25%","默认":"少见"},
+ targetBadge:"目前无获批靶向药",
+ targetText:"无获批靶向药。部分研究提示 ARID1A 缺失的肿瘤对免疫治疗可能相对敏感（研究性证据），可与医生讨论。",
+ chemo:"不影响常规化疗。",
+ prognosis:"作为分子分型指标之一，单独对预后影响有限。",
+ ask:["ARID1A 缺失对免疫治疗效果有参考价值吗？"]},
+{id:"IDH1",gene:"IDH1",aliases:["idh1","异柠檬酸脱氢酶1"],plain:"IDH1 突变会让细胞产生一种「错误燃料」（2-HG），干扰正常的分化程序，是肝内胆管癌特有的驱动事件之一。",
+ freq:{"肝癌":"罕见","胰腺癌":"罕见","胆管癌":"肝内约 15-20%（多为 R132 突变）","胆囊癌":"罕见","十二指肠癌":"罕见"},
+ targetBadge:"国外获批/指南推荐",
+ targetText:"<b>艾伏尼布（ivosidenib，商品名拓舒沃）</b>用于 IDH1 突变（R132）的经治胆管癌：美国 FDA 2021 年获批、欧洲 2023 年获批，已列入 NCCN、CSCO 等指南。国内该药已获批用于白血病，<b>胆管癌适应症尚未正式获批</b>（截至本工具数据日），部分患者可通过博鳌乐城先行区或临床研究获得——请以医生意见和最新官方信息为准。",
+ chemo:"携带 IDH1 突变的胆管癌对化疗的应答与其他类型相当，一线仍以吉西他滨+顺铂（可联合免疫）为标准。",
+ prognosis:"多项研究提示 IDH1 突变的肝内胆管癌预后相对较好，且多了一个靶向治疗选择。",
+ ask:["我的检测是否明确为 IDH1 R132 突变？艾伏尼布目前在国内如何获得（博鳌/临床研究/其他）？"]},
+{id:"IDH2",gene:"IDH2",aliases:["idh2","异柠檬酸脱氢酶2"],plain:"与 IDH1 类似，IDH2 突变也会让细胞产生「错误燃料」，是肝内胆管癌的驱动事件之一（比 IDH1 少见）。",
+ freq:{"肝癌":"罕见","胰腺癌":"罕见","胆管癌":"肝内约 5%","胆囊癌":"罕见","十二指肠癌":"罕见"},
+ targetBadge:"临床研究/证据有限",
+ targetText:"目前<b>没有</b>获批用于胆管癌的 IDH2 抑制剂（同类药物主要用于白血病，未获批胆道癌），建议咨询医生是否有临床研究机会。",
+ chemo:"同 IDH1：一线仍以吉西他滨+顺铂（可联合免疫）为标准。",
+ prognosis:"携带 IDH 突变型胆管癌整体预后相对较好。",
+ ask:["IDH2 突变目前有没有临床研究可以参加？"]},
+{id:"FGFR2",gene:"FGFR2",aliases:["fgfr2","fgfr2融合"],plain:"FGFR2 是细胞表面的「信号天线」，负责接收生长信号。融合/重排会让天线一直亮着、不断发出「生长」指令，主要见于肝内胆管癌。",
+ freq:{"肝癌":"罕见","胰腺癌":"罕见","胆管癌":"肝内约 10-15% 检出 FGFR2 融合/重排","胆囊癌":"罕见","十二指肠癌":"罕见"},
+ targetBadge:"国内已获批",
+ targetText:"<b>佩米替尼（pemigatinib，商品名达伯坦）</b>已于 2022 年 3 月在国内获批，用于既往接受过治疗、携带 FGFR2 融合/重排的晚期胆管癌；国外还获批了英菲格拉替尼（infigratinib）、福巴替尼（futibatinib）等同类药物。<b>注意：只有「融合/重排」与获批药物对应</b>，FGFR2 点突变或扩增目前没有获批的靶向药。",
+ chemo:"不影响化疗选择；一线仍为吉西他滨+顺铂（可联合免疫）。",
+ prognosis:"FGFR2 融合型肝内胆管癌与其他亚型预后相当，但多了一个有效的靶向治疗选择。",
+ ask:["我的 FGFR2 检测结果是「融合/重排」吗？融合伴侣是什么？我是否符合佩米替尼的用药条件？"]},
+{id:"BRAF",gene:"BRAF",aliases:["braf","brafv600e"],plain:"BRAF 是细胞生长信号通路（MAPK 通路）上的「中继站」。V600E 突变会让它一直处于开启状态，持续发送生长信号。",
+ freq:{"肝癌":"罕见","胰腺癌":"<2%","胆管癌":"约 5%","胆囊癌":"<5%","十二指肠癌":"约 5-10%"},
+ targetBadge:"国外获批/指南推荐",
+ targetText:"<b>达拉非尼 + 曲美替尼</b>联合方案在国外已获批用于 BRAF V600E 阳性的实体瘤（含胆管癌）；国内已获批用于黑色素瘤等，用于胆道癌多属指南推荐/超说明书范围，请咨询医生评估可及性与医保情况。",
+ chemo:"不影响化疗选择。",
+ prognosis:"V600E 突变本身对预后影响有限，重点是多了靶向治疗选项。",
+ ask:["我的 BRAF 是 V600E 突变吗？达拉非尼+曲美替尼方案我是否适合？"]},
+{id:"HER2",gene:"HER2/ERBB2",aliases:["her2","erbb2","人表皮生长因子受体2"],plain:"HER2 是细胞表面的「生长信号天线」。扩增/过表达等于天线数量大增，信号被放大，肿瘤长得更快。",
+ freq:{"肝癌":"少见（<5%）","胰腺癌":"约 2%","胆管癌":"肝内约 5-10%、肝外约 15-20%","胆囊癌":"约 15-20%","十二指肠癌":"约 10-20%"},
+ targetBadge:"国外获批/指南推荐",
+ targetText:"针对 HER2 阳性（通常指免疫组化 IHC 3+）的治疗选择在快速增加：<b>泽尼达妥单抗</b>（zanidatamab）2024 年 11 月获美国 FDA 批准用于经治的 HER2 阳性胆道癌；<b>德曲妥珠单抗</b>（DS-8201）2024 年获批用于 HER2 阳性泛实体瘤；NCCN 指南还推荐曲妥珠单抗+帕妥珠单抗、妥卡替尼+曲妥珠单抗等方案。国内曲妥珠单抗等已上市，用于胆道癌多为指南推荐/超说明书，需医生评估并确认报销政策。",
+ chemo:"不影响化疗选择。",
+ prognosis:"HER2 阳性肿瘤恶性度较高，但相应治疗选择也多，请积极与医生讨论。",
+ ask:["我的 HER2 结果具体是什么（IHC 几+？FISH 是否阳性？是扩增还是突变）？","我是否符合泽尼达妥单抗或德曲妥珠单抗的治疗条件？"]},
+{id:"MET",gene:"MET",aliases:["met","c-met"],plain:"MET 是细胞表面的生长因子受体。扩增或 14 号外显子跳跃突变都会让生长信号增强。",
+ freq:{default:"少见（约 1-5%），更多见于肺癌"},
+ targetBadge:"临床研究/证据有限",
+ targetText:"赛沃替尼、谷美替尼、卡马替尼等 MET 抑制剂主要获批用于肺癌（MET 14 外显子跳跃），用于肝胆胰/十二指肠癌的证据有限，多属临床研究或超说明书使用，请咨询医生。",
+ chemo:"不影响化疗选择。",
+ prognosis:"MET 异常提示肿瘤生长信号增强，具体影响需医生综合判断。",
+ ask:["MET 结果是扩增还是 14 外显子跳跃？有没有对应的研究机会？"]},
+{id:"RET",gene:"RET",aliases:["ret"],plain:"RET 是细胞表面的「天线」。融合会让它持续发送生长信号，驱动肿瘤。",
+ freq:{default:"极罕见（<1%）"},
+ targetBadge:"国外获批/指南推荐",
+ targetText:"塞普替尼（selpercatinib）、普拉替尼（pralsetinib）在国外已获批用于 RET 融合阳性实体瘤；国内已获批用于肺癌/甲状腺癌，用于其他癌种需医生评估（指南推荐/超说明书）。",
+ chemo:"不影响化疗选择。",
+ prognosis:"检出 RET 融合意味着多一个靶向治疗选项。",
+ ask:["确认是 RET 融合（而非其他变异）？相应靶向药如何获得？"]},
+{id:"NTRK",gene:"NTRK1/2/3",aliases:["ntrk","ntrk1","ntrk2","ntrk3","神经营养受体"],plain:"NTRK 基因家族参与神经发育。融合会让它们「卡在开启状态」，持续推动肿瘤生长。NTRK 融合在消化系统肿瘤中很罕见，但一旦检出就有对应的「广谱」靶向药。",
+ freq:{default:"罕见（<1%）"},
+ targetBadge:"国内已获批",
+ targetText:"<b>拉罗替尼（larotrectinib）</b>已在国内获批用于 NTRK 融合阳性的实体瘤（成人和儿童、不限癌种），<b>恩曲替尼（entrectinib）</b>也已获批同类适应症。检出 NTRK 融合的患者使用对应靶向药有效率较高（约 60-80%），请务必与医生讨论。",
+ chemo:"不影响化疗选择。",
+ prognosis:"携带 NTRK 融合的患者有高效靶向药可用，是「稀有但幸运」的靶点。",
+ ask:["确认融合是否为「功能性 NTRK 融合」（需病理复核）？","如何尽快获得拉罗替尼/恩曲替尼治疗？"]},
+{id:"EGFR",gene:"EGFR",aliases:["egfr","表皮生长因子受体"],plain:"EGFR 是细胞表面的生长信号天线。它在肺癌里非常重要，但在肝胆胰和十二指肠癌里，它的靶向意义非常有限——这是很多人会混淆的一点。",
+ freq:{default:"这些癌种中 EGFR 激活突变罕见；肝癌中 EGFR 扩增约 5-10%（意义不明确）"},
+ targetBadge:"需医生评估",
+ targetText:"<b>不推荐</b>仅依据 EGFR 突变/扩增就使用 EGFR 靶向药（如吉非替尼、厄洛替尼）治疗这些癌种——与肺癌完全不同，请勿自行用药。",
+ chemo:"不影响化疗选择。",
+ prognosis:"EGFR 结果在这些癌种中一般不作治疗依据，听医生的即可。",
+ ask:["这份报告里的 EGFR 结果对我有没有治疗意义？"]},
+{id:"ALKROS1",gene:"ALK/ROS1",aliases:["alk","ros1"],plain:"ALK 和 ROS1 是细胞表面的「天线」，融合可驱动肿瘤。这两个靶点在肝胆胰/十二指肠癌中极罕见，一旦检出通常按「泛癌种」思路处理。",
+ freq:{default:"极罕见（<1%）"},
+ targetBadge:"国外获批/指南推荐",
+ targetText:"阿来替尼、克唑替尼、恩曲替尼等已获批用于 ALK/ROS1 融合阳性的肺癌；用于其他癌种属于超说明书/指南推荐范畴，检出时请与医生确认。",
+ chemo:"不影响化疗选择。",
+ prognosis:"检出融合意味着多一个靶向治疗选项。",
+ ask:["确认是否为 ALK/ROS1 融合？相应靶向药是否适用于我？"]},
+{id:"PIK3CA",gene:"PIK3CA",aliases:["pik3ca","pi3k"],plain:"PIK3CA 参与细胞内的「营养感知与生长」信号（PI3K 通路）。突变会放大生长信号。",
+ freq:{"肝癌":"少见","胰腺癌":"少见","胆管癌":"约 5-15%","胆囊癌":"约 5-10%","十二指肠癌":"少见"},
+ targetBadge:"临床研究/证据有限",
+ targetText:"PI3K 抑制剂（如阿培利司 alpelisib）在国外获批用于乳腺癌等，用于消化系统肿瘤的证据有限，建议咨询医生是否有临床研究机会。",
+ chemo:"不影响化疗选择。",
+ prognosis:"单独对预后影响有限，需综合判断。",
+ ask:["PIK3CA 突变目前有可用的研究方案吗？"]},
+{id:"VEGFA",gene:"VEGFA",aliases:["vegfa","血管内皮生长因子"],plain:"VEGFA 编码「血管生成因子」，肿瘤靠它长出新的血管来获取营养。扩增意味着肿瘤血管更丰富。",
+ freq:{"肝癌":"约 5-10% 可检出扩增","默认":"少见"},
+ targetBadge:"临床研究/证据有限",
+ targetText:"抗血管生成药物（如仑伐替尼、索拉非尼、贝伐珠单抗）是肝癌的标准治疗，但 VEGFA 扩增能否预测疗效仍有争议，属于研究性指标。",
+ chemo:"不影响化疗选择。",
+ prognosis:"作为辅助指标参考。",
+ ask:["VEGFA 扩增对选择抗血管生成药物有参考价值吗？"]},
+{id:"BAP1",gene:"BAP1/PBRM1",aliases:["bap1","pbrm1"],plain:"这两个基因参与 DNA 的「包装整理」（染色质重塑），突变在肝内胆管癌中常见，常与 IDH1 突变互相排斥。",
+ freq:{"肝癌":"少见","胰腺癌":"少见","胆管癌":"肝内约 15-20%（BAP1）、约 5-10%（PBRM1）","胆囊癌":"少见","十二指肠癌":"少见"},
+ targetBadge:"目前无获批靶向药",
+ targetText:"无获批靶向药。部分研究提示 BAP1 缺失与铂类敏感性相关（证据有限）。",
+ chemo:"不影响常规化疗选择。",
+ prognosis:"作为分子分型指标，单独影响有限。",
+ ask:["BAP1/PBRM1 结果对我治疗有参考价值吗？"]},
+{id:"SMAD4",gene:"SMAD4",aliases:["smad4","dpc4"],plain:"SMAD4 是细胞「刹车」信号（TGF-β 通路）的关键组件。缺失会让细胞失去对抑制信号的响应，是胰腺癌最重要的预后基因之一。",
+ freq:{"肝癌":"少见","胰腺癌":"约 50%","胆管癌":"少见","胆囊癌":"少见","十二指肠癌":"少见"},
+ targetBadge:"目前无获批靶向药",
+ targetText:"目前没有直接针对 SMAD4 的获批靶向药。",
+ chemo:"不影响化疗方案选择。",
+ prognosis:"胰腺癌中 SMAD4 缺失与更广泛的播散性转移相关、预后偏差，需更积极的随访和影像监测。",
+ ask:["SMAD4 缺失对转移风险和随访计划有什么影响？"]},
+{id:"CDKN2A",gene:"CDKN2A",aliases:["cdkn2a","p16"],plain:"CDKN2A 编码「细胞周期刹车」蛋白（p16），防止细胞无限制分裂。",
+ freq:{"肝癌":"少见","胰腺癌":"约 30-40%","胆管癌":"少见","胆囊癌":"少见","十二指肠癌":"少见"},
+ targetBadge:"目前无获批靶向药",
+ targetText:"无获批靶向药（CDK4/6 抑制剂在胰腺癌研究中的效果有限）。",
+ chemo:"不影响化疗选择。",
+ prognosis:"胰腺癌中常见，提示肿瘤增殖活跃。",
+ hereditary:"如果报告标注为<b>胚系</b> CDKN2A 致病突变，与家族性非典型黑色素瘤-胰腺癌综合征（FAMMM）相关，建议遗传咨询并关注直系亲属筛查。",
+ ask:["这个突变是体细胞还是胚系？需要遗传咨询吗？"]},
+{id:"ATM",gene:"ATM",aliases:["atm"],plain:"ATM 是 DNA 双链断裂的「检修队长」。突变会影响 DNA 修复，也可能影响肿瘤对放疗、铂类和 PARP 抑制剂的反应。",
+ freq:{"肝癌":"少见","胰腺癌":"约 3-5%","胆管癌":"少见","胆囊癌":"少见","十二指肠癌":"少见"},
+ targetBadge:"临床研究/证据有限",
+ targetText:"PARP 抑制剂（如奥拉帕利）在 ATM 突变的胰腺癌中处于研究阶段，部分研究显示潜在获益，建议咨询医生或参加临床研究。",
+ chemo:"部分研究提示 ATM 突变肿瘤对铂类更敏感，可向医生提出讨论。",
+ hereditary:"ATM 胚系致病突变与乳腺癌、胰腺癌等风险升高相关，建议遗传咨询。",
+ ask:["ATM 突变对铂类或 PARP 抑制剂选择有参考价值吗？"]},
+{id:"BRCA",gene:"BRCA1/2",aliases:["brca1","brca2","brca"],plain:"BRCA1/BRCA2 是 DNA 修复（同源重组）的核心「维修队」。突变后 DNA 损伤无法正确修复，细胞更容易癌变——但反过来，这类肿瘤对铂类化疗和 PARP 抑制剂特别敏感。",
+ freq:{"肝癌":"少见","胰腺癌":"胚系约 5-8%、体细胞约 2-4%","胆管癌":"少见（约 1-2%）","胆囊癌":"少见","十二指肠癌":"少见"},
+ targetBadge:"国外获批/指南推荐",
+ targetText:"<b>奥拉帕利（olaparib）</b>在国外已获批用于携带<b>胚系 BRCA</b> 突变的胰腺癌、一线含铂化疗后的维持治疗（POLO 研究，无进展生存时间约翻倍）；<b>国内该适应症尚未正式获批</b>（该药在国内已获批卵巢癌、前列腺癌等），请咨询医生获取途径（含医保政策与临床研究）。",
+ chemo:"携带 BRCA/HRD 缺陷的肿瘤通常对铂类化疗（奥沙利铂、顺铂等）更敏感，医生可能据此制定方案。",
+ prognosis:"胚系 BRCA 突变的胰腺癌患者总体预后相对较好，且维持治疗可进一步延长无进展时间。",
+ hereditary:"<b>胚系 BRCA 突变会遗传</b>，与乳腺癌、卵巢癌、胰腺癌、前列腺癌等风险相关——务必进行遗传咨询，并告知直系亲属。",
+ ask:["我的报告区分了胚系/体细胞突变吗？是否需要抽血验证？","我是否符合奥拉帕利维持治疗的条件？家人需要做检测吗？"]},
+{id:"PALB2",gene:"PALB2",aliases:["palb2"],plain:"PALB2 是 BRCA2 的「搭档」，同样参与 DNA 修复，作用原理与 BRCA 类似。",
+ freq:{"肝癌":"罕见","胰腺癌":"胚系约 1-2%","胆管癌":"罕见","胆囊癌":"罕见","十二指肠癌":"罕见"},
+ targetBadge:"临床研究/证据有限",
+ targetText:"原理与 BRCA 类似：铂类化疗和 PARP 抑制剂可能获益，多项研究显示 PALB2 突变患者可从中获益，但 PALB2 尚无正式获批的维持治疗适应症，建议咨询医生或参加临床研究。",
+ chemo:"携带 PALB2 突变的肿瘤通常对铂类更敏感。",
+ hereditary:"PALB2 胚系突变与胰腺癌、乳腺癌等风险相关，建议遗传咨询并告知家人。",
+ ask:["我的 PALB2 是胚系突变吗？PARP 抑制剂或铂类强化是否适合我？"]},
+{id:"MMR",gene:"MLH1/MSH2/MSH6/PMS2",aliases:["mlh1","msh2","msh6","pms2","错配修复","mismatch"],plain:"这四个基因组成 DNA 的「校对系统」（错配修复 MMR），负责纠正复制错误。功能缺失会让错误大量累积——这既是坏事（易癌变），也是好事（肿瘤被免疫系统「看得清清楚楚」，免疫治疗效果特别好）。",
+ freq:{"肝癌":"罕见","胰腺癌":"约 1-2% 为 MSI-H/dMMR","胆管癌":"约 5%","胆囊癌":"约 5%","十二指肠癌":"约 10% 为 MSI-H/dMMR"},
+ targetBadge:"国内已获批",
+ targetText:"<b>PD-1/PD-L1 抑制剂</b>（如帕博利珠单抗、恩沃利单抗等）已在国内外获批用于 MSI-H/dMMR 晚期实体瘤（不限癌种）。若检出 dMMR，请务必与医生讨论免疫治疗的时机。",
+ chemo:"不影响化疗选择。",
+ prognosis:"dMMR 肿瘤对免疫治疗应答好，是「幸运的标志物」之一。",
+ hereditary:"胚系错配修复基因突变 = <b>林奇综合征（Lynch 综合征）</b>，与结直肠癌、子宫内膜癌、小肠癌等风险相关——务必遗传咨询、家人检测、定期筛查。",
+ ask:["这些基因是胚系突变吗？需要遗传咨询和家系筛查吗？"]},
+{id:"MSI",gene:"MSI-H / dMMR",aliases:["msi","msi-h","微卫星","微卫星不稳定","微卫星不稳定性"],plain:"微卫星不稳定性（MSI-H）表示肿瘤 DNA 的「校对系统」失灵，错误大量堆积。肿瘤看起来「浑身是破绽」，免疫系统因此很容易识别并攻击它。",
+ freq:{"肝癌":"罕见","胰腺癌":"约 1-2%","胆管癌":"约 5%","胆囊癌":"约 5%","十二指肠癌":"约 10%"},
+ targetBadge:"国内已获批",
+ targetText:"<b>帕博利珠单抗、恩沃利单抗</b>等 PD-1/PD-L1 抑制剂已在国内外获批用于 MSI-H/dMMR 晚期实体瘤（不限癌种），免疫治疗应答率较高（约 30-50%），请务必与医生讨论免疫治疗时机。",
+ chemo:"不影响化疗选择。",
+ prognosis:"MSI-H 肿瘤对免疫治疗应答好，是「幸运的标志物」之一。",
+ hereditary:"约三分之一到一半的 MSI-H 小肠/结直肠癌与林奇综合征（胚系 MMR 突变）相关，建议遗传咨询。",
+ ask:["我的 MSI 状态具体是哪种（MSI-H / MSS）？","我是否符合免疫治疗的适应证？需要遗传咨询吗？"]},
+{id:"TMB",gene:"TMB-H（高突变负荷）",aliases:["tmb","tmb-h","肿瘤突变负荷"],plain:"肿瘤突变负荷（TMB）衡量肿瘤里「错误」的总数量。错误越多，肿瘤看起来越「异常」，免疫系统越容易识别（新抗原多），免疫治疗可能越有效。",
+ freq:{default:"在肝胆胰/十二指肠癌中，TMB-H（通常 ≥10 mut/Mb）约占 5-10%"},
+ targetBadge:"国外获批/指南推荐",
+ targetText:"<b>帕博利珠单抗</b>在美国已获批用于 TMB-H（≥10 mut/Mb）的经治实体瘤（不限癌种）；国内属超说明书/指南推荐使用，请咨询医生。注意：TMB 判定受检测 panel 大小影响，以报告标注的阈值为准。",
+ chemo:"不影响化疗选择。",
+ prognosis:"TMB-H 通常提示免疫治疗机会更大。",
+ ask:["我的 TMB 具体数值是多少（如 12 mut/Mb）？按报告阈值是否属于 TMB-H？"]},
+{id:"PDL1",gene:"PD-L1 表达",aliases:["pd-l1","pdl1","pd-l1阳性","免疫组化pd-l1"],plain:"PD-L1 是肿瘤细胞「出示的通行证」，用来哄骗免疫细胞「别打我」。检测 PD-L1 表达水平（CPS/TPS）可以辅助预测免疫治疗效果。",
+ freq:{default:"不同癌种阳性率差异大；胆道癌 CPS≥1 约占一半左右"},
+ targetBadge:"国内已获批",
+ targetText:"重要说明：在<b>胆道癌和肝癌</b>中，免疫联合方案的获批并不强制要求 PD-L1 阳性，但表达水平高者可能获益更明显。<b>度伐利尤单抗</b>（TOPAZ-1 研究）已在国内获批联合吉西他滨+顺铂用于晚期胆道癌一线；<b>帕博利珠单抗</b>+化疗（KEYNOTE-966）同为一线推荐方案；肝癌的免疫联合方案（阿替利珠单抗+贝伐珠单抗、信迪利单抗+贝伐珠单抗、卡瑞利珠单抗+阿帕替尼等）均已获批，均不依赖 PD-L1 阈值。",
+ chemo:"不影响化疗选择。",
+ prognosis:"PD-L1 是预测性指标而非预后指标，阳性代表免疫治疗机会更大。",
+ ask:["我的 PD-L1 检测用的是哪种评分（CPS 还是 TPS）？数值是多少？对选择免疫治疗有什么参考？"]},
+{id:"HRD",gene:"HRD（同源重组缺陷）",aliases:["hrd","同源重组","同源重组缺陷"],plain:"HRD 指 DNA 修复（同源重组）系统整体失灵，常见原因包括 BRCA1/2、PALB2 等基因突变。HRD 阳性的肿瘤对铂类化疗和 PARP 抑制剂更敏感。",
+ freq:{default:"在胰腺癌等癌种中，HRD 阳性比例与 BRCA/PALB2/ATM 等基因状态相关"},
+ targetBadge:"临床研究/证据有限",
+ targetText:"PARP 抑制剂（如奥拉帕利）在 HRD 阳性的胰腺癌等肿瘤中处于研究阶段，多项研究显示潜在获益；是否使用需由医生结合胚系/体细胞状态综合判断。",
+ chemo:"HRD 阳性肿瘤通常对铂类化疗更敏感，医生可能据此考虑强化方案。",
+ hereditary:"HRD 阳性的背后若是胚系 BRCA/PALB2 等突变，务必进行遗传咨询。",
+ ask:["我的 HRD 评分是多少？对应的基因缺陷是什么？是否建议铂类或 PARP 抑制剂？"]},
+{id:"UGT1A1",gene:"UGT1A1",aliases:["ugt1a1","ugt1a1*6","ugt1a1*28"],plain:"UGT1A1 负责「解毒」伊立替康（一种常用化疗药）的代谢产物。基因变异（*6、*28 等）会让解毒变慢，用药后发生严重骨髓抑制/腹泻的风险升高。",
+ freq:{default:"中国人群约 20-40% 携带至少一个变异位点"},
+ targetBadge:"指南推荐参考",
+ targetText:"这是化疗「毒性」基因检测：携带 <b>*28 或 *6 纯合（或双杂合）</b>时，国内外说明书和指南均建议伊立替康<b>减量</b>；杂合携带者多数可用常规剂量，但需密切监测血象和腹泻。",
+ chemo:"只关乎伊立替康的毒性管理，与疗效无关；请把结果带给医生以便安全用药。",
+ prognosis:"与预后无关。",
+ ask:["我的 UGT1A1 是哪种基因型（*1/*1、*1/*6、*6/*6、*28/*28 等）？伊立替康需要减量吗？"]},
+{id:"DPYD",gene:"DPYD",aliases:["dpyd","dihydropyrimidine"],plain:"DPYD 负责代谢氟尿嘧啶类化疗药（5-FU、卡培他滨、替吉奥）。极少数人携带缺陷基因，用药后可能发生严重甚至致命的毒性反应。",
+ freq:{default:"中国人群重度缺陷率约 1-2%（低于欧美人群）"},
+ targetBadge:"指南推荐参考",
+ targetText:"国内外指南建议：检出 DPYD 缺陷（如 *2A、c.2846A>T 等）时，氟尿嘧啶类需<b>减量或更换方案</b>。这是「防严重副作用」的检测，非常有价值，请务必告知医生。",
+ chemo:"只关乎氟尿嘧啶类毒性管理，与疗效无关。",
+ prognosis:"与预后无关。",
+ ask:["我的 DPYD 基因型是什么？卡培他滨/5-FU 需要调整剂量吗？"]},
+{id:"CHEMOSENS",gene:"TYMS/ERCC1/GSTP1（药敏）",aliases:["tyms","ercc1","gstp1","药敏","化疗敏感性"],plain:"这类检测想通过基因判断肿瘤对某些化疗药「敏感还是耐药」（如 TYMS→氟尿嘧啶类、ERCC1/GSTP1→铂类）。",
+ freq:{default:"此类检测在各类报告套餐中常见"},
+ targetBadge:"临床研究/证据有限",
+ targetText:"坦率地说：目前国际主流指南（如 NCCN）<b>不推荐仅依据这些基因调整化疗方案</b>，相关证据有限、结论不一致。它们可供医生参考，但<b>不应</b>据此自行拒绝或改变标准治疗。真正影响化疗决策的是癌种、分期、体能状态和既往治疗。",
+ chemo:"请以医生结合临床情况的意见为准。",
+ prognosis:"与预后无关。",
+ ask:["医生，这份药敏基因报告对化疗方案有参考价值吗？"]},
+{id:"GERMLINE",gene:"胚系 vs 体细胞突变",aliases:["胚系","体细胞","germline","somatic","遗传","遗传突变"],plain:"体细胞突变：只在肿瘤里出现、不是遗传来的（绝大多数癌症突变属于此类）。胚系突变：出生时就有、全身每个细胞都携带、可能遗传给子女（如 BRCA、MLH1 等）。检测机构通常需要配对血液（或唾液）样本才能区分。",
+ freq:{default:"一份正规报告会逐基因标注「体细胞 / 胚系 / 意义未明（VUS）」"},
+ targetBadge:"需医生评估",
+ targetText:"请核对报告标注：若标注「胚系」或「疑似胚系」致病突变，务必进行遗传咨询并告知直系亲属；「意义未明（VUS）」则暂不影响治疗决策，随访复查即可。",
+ chemo:"不影响化疗选择。",
+ prognosis:"与预后无直接关系。",
+ ask:["报告中哪些基因属于胚系突变？需要抽血验证吗？家人是否需要检测？","「意义未明（VUS）」的结果需要关注吗？"]},
+{id:"CTDNA",gene:"ctDNA / MRD",aliases:["ctdna","mrd","循环肿瘤dna","微小残留病灶","液体活检"],plain:"ctDNA 是肿瘤细胞死亡后释放到血液里的 DNA 碎片，抽血即可检测（液体活检）。MRD（微小残留病灶）指治疗后血液里仍能测到 ctDNA，提示可能有残留病灶、复发风险较高。",
+ freq:{default:"报告里可能是定性结果（检出/未检出）或浓度数值"},
+ targetBadge:"需医生评估",
+ targetText:"ctDNA/MRD 主要用于疗效监测和复发预警：阳性不意味着马上复发，需结合影像随访；阴性也不能完全排除。检测敏感度与 panel 大小有关，解读请以检测机构说明和医生意见为准。",
+ chemo:"不影响化疗选择。",
+ prognosis:"MRD 阳性提示复发风险较高，医生可能建议加强复查频率。",
+ ask:["MRD 监测对我有推荐价值吗？多久复查一次？阳性后下一步该做什么？"]}
+];
+
+/* ========== 工具函数 ========== */
+function esc(s){return String(s==null?"":s).replace(/[&<>"']/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];});}
+
+function aliasIndex(){
+  var idx={};
+  KB.forEach(function(e){
+    idx[e.id.toLowerCase()]=e;
+    idx[e.gene.toLowerCase()]=e;
+    e.aliases.forEach(function(a){idx[a.toLowerCase()]=e;});
+  });
+  return idx;
+}
+var IDX=aliasIndex();
+
+function normGene(s){
+  var t=String(s||"").replace(/\s+/g,"").toLowerCase().replace(/基因$/,"");
+  var e=IDX[t];
+  return e?e.id:null;
+}
+
+function findFreq(e,cancer){
+  if(typeof e.freq==="string") return e.freq;
+  return e.freq[cancer]||e.freq["默认"]||e.freq["default"]||"";
+}
+
+var DEFAULT_TYPE={"KRAS":"突变","TP53":"突变","TERT":"突变","CTNNB1":"突变","ARID":"突变","IDH1":"突变","IDH2":"突变","FGFR2":"融合/重排","BRAF":"突变","HER2":"扩增/拷贝数增加","MET":"突变","RET":"融合/重排","NTRK":"融合/重排","EGFR":"突变","ALKROS1":"融合/重排","PIK3CA":"突变","VEGFA":"扩增/拷贝数增加","BAP1":"突变","SMAD4":"突变","CDKN2A":"突变","ATM":"突变","BRCA":"突变","PALB2":"突变","MMR":"突变","MSI":"MSI-H","TMB":"TMB-H","PDL1":"PD-L1阳性","HRD":"未标注/不确定","UGT1A1":"突变","DPYD":"突变","CHEMOSENS":"突变","GERMLINE":"胚系突变","CTDNA":"未标注/不确定"};
+
+/* ========== 状态 ========== */
+var state={cancer:"",items:[]};
+function saveState(){try{localStorage.setItem("geneHelperV1",JSON.stringify(state));}catch(e){}}
+function loadState(){try{var s=localStorage.getItem("geneHelperV1");if(s){state=JSON.parse(s);}}catch(e){}}
+
+/* ========== 渲染：癌种 ========== */
+function renderCancer(){
+  var html='<div class="cancer-opt'+(state.cancer===""?" on":"")+'" data-c="">不确定 / 多癌种</div>';
+  CANCERS.forEach(function(c){
+    html+='<div class="cancer-opt'+(state.cancer===c?" on":"")+'" data-c="'+c+'">'+c+'</div>';
+  });
+  document.getElementById("cancerGrid").innerHTML=html;
+}
+
+/* ========== 渲染：速选 chips ========== */
+var CHIPS=[
+{cat:"驱动基因类",items:[
+  ["KRAS","KRAS"],["TP53","TP53"],["TERT","TERT启动子"],["CTNNB1","CTNNB1"],["ARID","ARID1A/ARID2"],
+  ["IDH1","IDH1"],["IDH2","IDH2"],["FGFR2","FGFR2"],["BRAF","BRAF"],["HER2","HER2/ERBB2"],
+  ["MET","MET"],["RET","RET"],["NTRK","NTRK1/2/3"],["EGFR","EGFR"],["ALKROS1","ALK/ROS1"],
+  ["PIK3CA","PIK3CA"],["VEGFA","VEGFA"],["BAP1","BAP1/PBRM1"],["SMAD4","SMAD4"],["CDKN2A","CDKN2A"],
+  ["ATM","ATM"],["BRCA","BRCA1/2"],["PALB2","PALB2"],["MMR","MLH1/MSH2/MSH6/PMS2"]
+]},
+{cat:"免疫与泛标志物",items:[
+  ["MSI","MSI-H / dMMR"],["TMB","TMB-H（高突变负荷）"],["PDL1","PD-L1 表达"],["HRD","HRD（同源重组缺陷）"]
+]},
+{cat:"化疗相关基因",items:[
+  ["UGT1A1","UGT1A1（伊立替康毒性）"],["DPYD","DPYD（氟尿嘧啶毒性）"],["CHEMOSENS","TYMS/ERCC1/GSTP1（药敏）"]
+]},
+{cat:"其他概念",items:[
+  ["GERMLINE","胚系 vs 体细胞突变"],["CTDNA","ctDNA / MRD"]
+]}
+];
+
+function hasItem(id){return state.items.some(function(it){return it.id===id;});}
+
+function renderChips(){
+  var html="";
+  CHIPS.forEach(function(g){
+    html+='<div class="chip-group"><h4>'+g.cat+'</h4><div class="chips">';
+    g.items.forEach(function(p){
+      var on=hasItem(p[0])?" on":"";
+      html+='<button class="chip'+on+'" data-id="'+p[0]+'">'+p[1]+'</button>';
+    });
+    html+="</div></div>";
+  });
+  document.getElementById("chipGroups").innerHTML=html;
+}
+
+/* ========== 渲染：已选列表 ========== */
+function renderItems(){
+  var box=document.getElementById("itemList");
+  if(state.items.length===0){
+    box.innerHTML="";
+    document.getElementById("emptyHint").style.display="";
+    return;
+  }
+  document.getElementById("emptyHint").style.display="none";
+  var html="";
+  state.items.forEach(function(it,ix){
+    var opts=TYPE_OPTIONS.map(function(t){
+      return '<option value="'+esc(t)+'"'+(it.type===t?" selected":"")+'>'+esc(t)+"</option>";
+    }).join("");
+    var name=it.geneLabel||"";
+    html+='<div class="item-row" data-ix="'+ix+'">'
+      +'<span class="gname">'+esc(name)+'</span>'
+      +'<select data-f="type">'+opts+"</select>"
+      +'<input type="text" data-f="detail" placeholder="变异详情（可选），如 G12C、R132、*6、CPS=20" value="'+esc(it.detail||"")+'">'
+      +'<button class="rm" title="删除">×</button>'
+      +"</div>";
+  });
+  box.innerHTML=html;
+}
+
+/* ========== 手动输入 / 粘贴识别 ========== */
+function addItem(id,type,detail,geneLabel){
+  if(!id) return;
+  var same=state.items.find(function(it){return it.id===id && it.type===type && (it.detail||"")===(detail||"");});
+  if(!same){state.items.push({id:id,geneLabel:geneLabel||KB.find(function(e){return e.id===id;}).gene,type:type,detail:detail||""});}
+  renderChips();renderItems();saveState();
+}
+
+function addByGeneInput(){
+  var raw=document.getElementById("mGene").value;
+  var id=normGene(raw);
+  if(!id){alert("未识别该基因/标志物，请检查拼写，或从「速选」列表中选择。");return;}
+  var type=document.getElementById("mType").value;
+  var detail=document.getElementById("mDetail").value.trim();
+  addItem(id,type,detail);
+  document.getElementById("mGene").value="";document.getElementById("mDetail").value="";
+}
+
+var SCAN_PAT=/(?:^|[^A-Za-z0-9])((?:KRAS|NRAS|HRAS|EGFR|ALK|ROS1|BRAF|TP53|TERT|CTNNB1|ARID1A|ARID2|IDH1|IDH2|FGFR2|FGFR1|FGFR3|ERBB2|HER2|MET|RET|NTRK1|NTRK2|NTRK3|PIK3CA|VEGFA|BAP1|PBRM1|SMAD4|CDKN2A|ATM|BRCA1|BRCA2|PALB2|MLH1|MSH2|MSH6|PMS2|UGT1A1|DPYD|TYMS|ERCC1|GSTP1|PD-?L1|MSI-?H?|TMB-?H?|HRD|ctDNA|MRD|微卫星|肿瘤突变负荷|同源重组缺陷|胚系|遗传突变))(?=[^A-Za-z0-9]|$)/gi;
+var TYPE_KW=[["扩增","扩增/拷贝数增加"],["融合","融合/重排"],["重排","融合/重排"],["缺失","缺失/丢失"],["丢失","缺失/丢失"],["过表达","过表达"],["跳变","突变"],["跳跃","突变"],["胚系","胚系突变"],["突变","突变"]];
+
+function scanPaste(){
+  var text=document.getElementById("pasteBox").value;
+  if(!text.trim()){alert("请先粘贴报告文字。");return;}
+  var seen={};var added=0;var m;
+  SCAN_PAT.lastIndex=0;
+  while((m=SCAN_PAT.exec(text))!==null){
+    var name=m[1].toUpperCase();
+    var id=normGene(name);
+    if(!id){continue;}
+    if(name==="HER2"||name==="ERBB2"){id="HER2";}
+    if(seen[id]){continue;}
+    seen[id]=true;
+    var after=text.slice(m.index+m[0].length, m.index+m[0].length+14);
+    var type=(DEFAULT_TYPE[id]||"未标注/不确定");
+    for(var i=0;i<TYPE_KW.length;i++){
+      if(after.indexOf(TYPE_KW[i][0])>-1){type=TYPE_KW[i][1];break;}
+    }
+    var detail="";
+    var dm=after.match(/(G12C|G12D|G12V|G12R|G13D|Q61|R132|V600|EX14|14外显子|CPS\s*[=:]?\s*\d+|TPS\s*[=:]?\s*\d+|\*\s*\d+)/i);
+    if(dm){detail=dm[1];}
+    else if(id==="TMB"){var num=after.match(/\d+(?:\.\d+)?/);if(num){detail=num[0];}}
+    addItem(id,type,detail);
+    added++;
+  }
+  if(added===0){alert("没有识别到已知的基因/标志物。请尝试「速选」或「手动输入」，或检查粘贴内容。");}
+  else{document.getElementById("pasteBox").value="";alert("已识别并添加 "+added+" 项，请在下方列表中核对类型和详情。");}
+}
+
+/* ========== 特殊靶点分支 ========== */
+function resolveTarget(entry,item){
+  var d=((item.detail||"")+" "+(item.type||"")).toUpperCase();
+  if(entry.id==="KRAS"&&/G12C/.test(d)){
+    return {badge:"国外获批/指南推荐",
+      text:"<b>索托拉西布（sotorasib）</b>和<b>阿达格拉西布（adagrasib）</b>能抑制 KRAS G12C 突变。它们已在国外获批用于肺癌等癌种，并列入胰腺癌 NCCN 指南推荐选项；但在胰腺癌/胆管癌中属于<b>超说明书或临床研究</b>用药，国内未正式获批。请务必与主治医生确认是否适合、如何获取。"};
+  }
+  if(entry.id==="BRAF"&&!/V600E/.test(d)){
+    return {badge:"临床研究/证据有限",
+      text:"BRAF <b>非 V600E</b> 突变目前没有获批的靶向药，其意义需要由医生结合其他检测结果评估。"};
+  }
+  if(entry.id==="FGFR2"&&/突变|扩增/.test(d)&&!/融合|重排/.test(d)){
+    return {badge:"需医生评估",
+      text:"注意：FGFR2 只有「<b>融合/重排</b>」与已获批药物（佩米替尼等）对应；FGFR2 点突变或扩增目前没有获批的靶向药。"};
+  }
+  if(entry.id==="HER2"&&/突变/.test(d)&&!/扩增|过表达/.test(d)){
+    return {badge:"临床研究/证据有限",
+      text:"HER2「突变」（而非扩增/过表达）在胆管癌中约占 6%，抗 HER2 药物对突变的疗效数据有限，建议咨询医生或参加临床研究。"};
+  }
+  return null;
+}
+
+/* ========== 分析 ========== */
+function isNegative(entry,item){
+  var s=((item.detail||"")+" "+(item.type||"")).toLowerCase();
+  var d=String(item.detail||"").toLowerCase();
+  if(entry.id==="MMR"||entry.id==="MSI"){
+    if(/缺失|不表达|dmmr|high/.test(d)) return false;
+  }
+  return /野生|未检|阴性|无突变|未见|不表达|稳定|mss|低/.test(s);
+}
+function isPositive(entry,item){
+  var t=item.type||"";var s=(item.detail||"").toLowerCase();
+  if(t==="MSI-H"||t==="TMB-H"||t==="PD-L1阳性") return true;
+  if(entry.id==="MMR"||entry.id==="MSI") return /缺失|不表达|dmmr|阳性|检出|high/.test(s);
+  if(entry.id==="PDL1") return /阳性|检出|表达|positive|cps|≥/.test(s);
+  return /阳性|检出|表达|high/.test(s);
+}
+
+function itemCard(entry,item,cancer){
+  var sp=resolveTarget(entry,item);
+  var badge=sp?sp.badge:entry.targetBadge;
+  var text=sp?sp.text:entry.targetText;
+  var freq=findFreq(entry,cancer);
+  var html='<article class="card gene-card">';
+  html+='<div class="gc-head"><h3>'+esc(entry.gene)+'</h3><span class="type-badge">'+esc(item.type||"未标注")+"</span></div>";
+  if(item.detail){html+='<div class="gc-section"><p style="font-size:13.5px;color:var(--ink-3);">报告原文/详情：'+esc(item.detail)+"</p></div>";}
+  html+='<div class="gc-section"><h4>这个基因 / 指标是什么？</h4><p>'+entry.plain+"</p></div>";
+  if(freq){html+='<div class="gc-section"><h4>在'+esc(cancer||"此类肿瘤")+'中的检出</h4><p>'+freq+"</p></div>";}
+  if(badge&&text){
+    var cls=BADGE_CLS[badge]||"b-ask";
+    html+='<div class="gc-section target"><h4>靶向 / 用药相关</h4><p><span class="badge '+cls+'">'+esc(badge)+"</span>"+text+"</p></div>";
+  }
+  if(entry.chemo){html+='<div class="gc-section"><h4>化疗相关提示</h4><p>'+entry.chemo+"</p></div>";}
+  if(entry.prognosis){html+='<div class="gc-section"><h4>预后 / 复发含义</h4><p>'+entry.prognosis+"</p></div>";}
+  if(entry.hereditary){html+='<div class="gc-section hered"><h4>遗传风险提示</h4><p>'+entry.hereditary+"</p></div>";}
+  if(entry.ask&&entry.ask.length){
+    html+='<div class="gc-section ask"><h4>见医生时问这些</h4><ul>';
+    entry.ask.forEach(function(a){html+="<li>"+a+"</li>";});
+    html+="</ul></div>";
+  }
+  html+="</article>";
+  return html;
+}
+
+function negativeCard(entry,item,cancer){
+  var html='<article class="card gene-card">';
+  html+='<div class="gc-head"><h3>'+esc(entry.gene)+'</h3><span class="badge b-none">未检出 / 阴性</span></div>';
+  html+='<div class="gc-section"><p>'+esc(entry.gene)+" 未检出变异（阴性结果），意味着<strong>没有针对这个基因的靶向药机会</strong>。这是很常见的情况——多数患者并不会检出所有靶点，不必因此失望。</p></div>";
+  if(entry.id==="PDL1"){
+    html+='<div class="gc-section"><p>关于 PD-L1 阴性：在胆道癌和肝癌中，免疫联合方案的获批<b>并不依赖 PD-L1 阈值</b>，阴性不代表没有免疫治疗机会，请以医生意见为准。</p></div>';
+  }
+  if(entry.id==="MSI"){
+    html+='<div class="gc-section"><p>MSI 稳定（MSS）是最常见的类型。它意味着没有 MSI-H 带来的免疫治疗优势，但<b>联合化疗+免疫等方案仍可能适用</b>，尤其是胆道癌和肝癌，请与医生讨论。</p></div>';
+  }
+  html+='<div class="gc-section"><p>治疗仍按您癌种的标准方案推进（化疗 / 免疫 / 抗血管生成等），请听主治医生的安排。</p></div>';
+  html+="</article>";
+  return html;
+}
+
+function unknownCard(geneName){
+  return '<article class="card gene-card unmatched">'
+    +'<div class="gc-head"><h3>'+esc(geneName)+'</h3><span class="badge b-trial">暂未收录</span></div>'
+    +'<div class="gc-section"><p>这个基因/指标目前不在我们的知识库里，无法自动解读。请把它带给主治医生确认；不同检测公司 panel 差异较大，同一基因的意义也随癌种不同。您也可以联系开发者补充知识库。</p></div>'
+    +"</article>";
+}
+
+var TREAT_BASICS={
+"肝癌":"<b>一线治疗</b>（不依赖基因突变，以肝功能、分期和体能为主）：索拉非尼、仑伐替尼、多纳非尼，或免疫联合方案——阿替利珠单抗+贝伐珠单抗、信迪利单抗+贝伐珠单抗、卡瑞利珠单抗+阿帕替尼等。<b>二线</b>：瑞戈非尼等。基因层面：肝癌缺少「必须做靶点检测才用药」的强驱动基因，检测更多用于找<b>罕见但可干预</b>的靶点（MSI-H、TMB-H、NTRK 融合、BRAF V600E 等）。",
+"胰腺癌":"<b>一线化疗</b>：FOLFIRINOX 或吉西他滨+白蛋白紫杉醇（按体能和年龄选择）。<b>基因层面最值得关注</b>：BRCA/PALB2（→铂类化疗 + PARP 抑制剂维持）、MSI-H/dMMR（→免疫治疗）、KRAS G12C（→研究性靶向药）、NTRK 融合（→拉罗替尼等）。晚期胰腺癌对化疗总体不敏感，体能状态和营养支持非常重要。",
+"胆管癌":"<b>一线标准</b>：吉西他滨+顺铂+免疫治疗——度伐利尤单抗（TOPAZ-1，国内已获批）或帕博利珠单抗（KEYNOTE-966）。<b>基因层面（肝内胆管癌尤其重要）</b>：FGFR2 融合（→佩米替尼，国内已获批）、IDH1 突变（→艾伏尼布，国外获批）、HER2 阳性（→泽尼达妥单抗、德曲妥珠单抗等）、BRAF V600E（→达拉非尼+曲美替尼）、MSI-H/TMB-H/NTRK（→免疫或广谱靶向）。建议做包含这些位点的基因检测。",
+"胆囊癌":"<b>一线</b>：吉西他滨+顺铂+免疫（同胆管癌）。<b>基因层面</b>：胆囊癌 HER2 扩增/过表达相对多见（约 15-20%），值得检测；其余参考胆管癌的靶点列表。",
+"十二指肠癌":"按小肠/结直肠腺癌思路治疗：<b>化疗</b>多用含奥沙利铂或伊立替康的方案（FOLFOX / FOLFIRI）。<b>基因层面</b>：十二指肠癌 MSI-H 比例相对高（约 10%），检出 MSI-H/dMMR 意味着免疫治疗机会大；BRAF V600E、HER2 扩增也值得关注。",
+"":"未选择癌种时的通用说明：同一基因在不同癌种中的意义不同，请尽量选择癌种以获得更准确的解读。"
+};
+
+var GLOBAL_ASK=[
+"哪些发现是「可干预」的靶点？按重要性排序是怎样的？",
+"对应药物是否适合我的分期、体能和既往治疗？是否可及（医院/药房）、医保如何报销？",
+"有没有 MSI / TMB / PD-L1 提示的免疫治疗机会？",
+"报告里哪些是胚系（遗传）突变？是否需要遗传咨询？家人需要检测吗？",
+"我的情况是否需要多学科会诊（MDT）？"
+];
+
+function analyze(){
+  var results=document.getElementById("results");
+  var body=document.getElementById("resultsBody");
+  if(state.items.length===0){alert("请先录入至少一个检测项目。");return;}
+
+  var actionable=0,immuno=0,hered=0,neg=0,unk=0;
+  var html="";
+
+  state.items.forEach(function(it){
+    var entry=KB.find(function(e){return e.id===it.id;});
+    if(!entry){html+=unknownCard(it.geneLabel||it.id);unk++;return;}
+    if(isNegative(entry,it)){html+=negativeCard(entry,it,state.cancer);neg++;return;}
+    html+=itemCard(entry,it,state.cancer);
+    var sp=resolveTarget(entry,it);
+    var badge=sp?sp.badge:entry.targetBadge;
+    if(badge==="国内已获批"||badge==="国外获批/指南推荐"){actionable++;}
+    if((entry.id==="MSI"||entry.id==="TMB"||entry.id==="PDL1"||entry.id==="MMR")&&isPositive(entry,it)){immuno++;}
+    if(entry.hereditary){hered++;}
+  });
+
+  var summary=document.getElementById("summaryStrip");
+  summary.innerHTML='<div class="kv"><b>'+state.items.length+'</b><span>已解读项目</span></div>'
+    +'<div class="kv"><b>'+actionable+'</b><span>可能对应靶向治疗</span></div>'
+    +'<div class="kv"><b>'+immuno+'</b><span>免疫治疗标志物阳性</span></div>'
+    +'<div class="kv"><b>'+hered+'</b><span>建议遗传咨询</span></div>';
+
+  var tl="您的报告共解读 "+state.items.length+" 项结果：";
+  if(actionable>0){tl+="其中 <b>"+actionable+" 项</b>可能对应已获批或指南推荐的靶向治疗；";}
+  if(immuno>0){tl+="<b>"+immuno+" 项</b>提示免疫治疗机会；";}
+  if(hered>0){tl+="<b>"+hered+" 项</b>建议进行遗传咨询；";}
+  if(actionable===0&&immuno===0&&hered===0){tl+="本次解读未发现明确的靶向或免疫治疗标志物；";}
+  tl+="这些只是线索，最终治疗方案请由主治医生结合分期、病理、影像和身体情况决定。";
+  document.getElementById("tlCard").innerHTML="<h3>三句话总结</h3><p>"+tl+"</p>";
+
+  var basics=state.cancer?TREAT_BASICS[state.cancer]:TREAT_BASICS[""];
+  document.getElementById("treatBox").innerHTML="<h3>关于"+esc(state.cancer||"您的情况")+"的治疗常识</h3><ul>"
+    +basics.split(/<br>|\n/).filter(function(x){return x.trim();}).map(function(x){return "<li>"+x+"</li>";}).join("")
+    +"</ul>";
+
+  var askHtml="<ul>";
+  GLOBAL_ASK.forEach(function(a){askHtml+="<li>"+a+"</li>";});
+  askHtml+="</ul>";
+  document.getElementById("askBox").innerHTML="<h3>带这些问题去见医生（通用清单）</h3>"+askHtml;
+
+  body.innerHTML=html;
+  results.hidden=false;
+  document.getElementById("results").scrollIntoView({behavior:"smooth",block:"start"});
+}
+
+/* ========== 事件绑定 ========== */
+function bind(){
+  document.getElementById("cancerGrid").addEventListener("click",function(ev){
+    var t=ev.target.closest(".cancer-opt");
+    if(!t) return;
+    state.cancer=t.getAttribute("data-c")||"";
+    renderCancer();saveState();
+  });
+
+  document.querySelectorAll(".tab").forEach(function(tab){
+    tab.addEventListener("click",function(){
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});
+      document.querySelectorAll(".pane").forEach(function(x){x.classList.remove("on");});
+      tab.classList.add("on");
+      document.getElementById("pane-"+tab.getAttribute("data-tab")).classList.add("on");
+    });
+  });
+
+  document.getElementById("chipGroups").addEventListener("click",function(ev){
+    var t=ev.target.closest(".chip");
+    if(!t) return;
+    var id=t.getAttribute("data-id");
+    var ix=state.items.findIndex(function(it){return it.id===id;});
+    if(ix>-1){state.items.splice(ix,1);}
+    else{addItem(id,DEFAULT_TYPE[id]||"未标注/不确定");}
+    renderChips();renderItems();saveState();
+  });
+
+  document.getElementById("itemList").addEventListener("click",function(ev){
+    var rm=ev.target.closest(".rm");
+    if(!rm) return;
+    var row=rm.closest(".item-row");
+    var ix=parseInt(row.getAttribute("data-ix"),10);
+    state.items.splice(ix,1);
+    renderItems();renderChips();saveState();
+  });
+  document.getElementById("itemList").addEventListener("change",function(ev){
+    var row=ev.target.closest(".item-row");
+    var ix=parseInt(row.getAttribute("data-ix"),10);
+    var f=ev.target.getAttribute("data-f");
+    if(f==="type"){state.items[ix].type=ev.target.value;}
+    if(f==="detail"){state.items[ix].detail=ev.target.value;}
+    saveState();
+  });
+
+  document.getElementById("btnAdd").addEventListener("click",addByGeneInput);
+  document.getElementById("mGene").addEventListener("keydown",function(ev){if(ev.key==="Enter"){ev.preventDefault();addByGeneInput();}});
+  document.getElementById("btnScan").addEventListener("click",scanPaste);
+  document.getElementById("btnAnalyze").addEventListener("click",analyze);
+  document.getElementById("btnPrint").addEventListener("click",function(){window.print();});
+
+  document.getElementById("btnClear").addEventListener("click",function(){
+    if(!confirm("确定清空所有已录入的项目吗？")) return;
+    state.items=[];state.cancer="";
+    renderCancer();renderChips();renderItems();saveState();
+    document.getElementById("results").hidden=true;
+    window.scrollTo({top:0,behavior:"smooth"});
+  });
+
+  var dl=document.getElementById("geneList");
+  var opts=KB.map(function(e){return '<option value="'+esc(e.gene)+'">';}).join("");
+  dl.innerHTML=opts;
+
+  var typeSel=document.getElementById("mType");
+  typeSel.innerHTML=TYPE_OPTIONS.map(function(t){return '<option>'+esc(t)+"</option>";}).join("");
+  typeSel.value="突变";
+}
+
+/* ========== 初始化 ========== */
+loadState();
+document.addEventListener("DOMContentLoaded",function(){
+  renderCancer();renderChips();renderItems();bind();
+});
+</script>
+</body>
+</html>
